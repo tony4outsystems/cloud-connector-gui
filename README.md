@@ -35,6 +35,17 @@ Install .NET 10 SDK, then run:
 The script publishes the self-contained Windows app to `artifacts/win-x64`. The connector binary is
 downloaded by the app at runtime.
 
+## Release
+
+GitHub Actions builds and publishes a Windows release package when a `v*` tag is pushed:
+
+```sh
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+The workflow can also be run manually from GitHub Actions with a tag name. It uploads `cloud-connector-windows-gui-win-x64.zip` as both a workflow artifact and a GitHub Release asset.
+
 ## Test
 
 ```sh
