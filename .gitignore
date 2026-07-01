@@ -5,4 +5,4 @@ artifacts/
 *.user
 *.suo
 .DS_Store
-
+.vs
