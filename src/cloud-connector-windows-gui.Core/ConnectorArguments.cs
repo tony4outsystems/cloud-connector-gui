@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace CloudConnectorWin.Core;
+namespace CloudConnectorWindowsGui.Core;
 
 public static class ConnectorArguments
 {
@@ -54,4 +54,3 @@ public static class ConnectorArguments
         return string.Create(CultureInfo.InvariantCulture, $"\"{value.Replace("\"", "\\\"", StringComparison.Ordinal)}\"");
     }
 }
-

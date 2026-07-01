@@ -1,4 +1,4 @@
-namespace CloudConnectorWin.Core;
+namespace CloudConnectorWindowsGui.Core;
 
 public sealed record Endpoint(string LocalPort, string RemoteHost, string RemotePort)
 {
@@ -7,4 +7,3 @@ public sealed record Endpoint(string LocalPort, string RemoteHost, string Remote
         return $"R:{LocalPort.Trim()}:{RemoteHost.Trim()}:{RemotePort.Trim()}";
     }
 }
-

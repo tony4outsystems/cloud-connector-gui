@@ -2,11 +2,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CloudConnectorWin", "src\CloudConnectorWin\CloudConnectorWin.csproj", "{337C2A48-55A9-4C87-9296-357ACECDF9F7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "cloud-connector-windows-gui", "src\cloud-connector-windows-gui\cloud-connector-windows-gui.csproj", "{337C2A48-55A9-4C87-9296-357ACECDF9F7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CloudConnectorWin.Core", "src\CloudConnectorWin.Core\CloudConnectorWin.Core.csproj", "{253BDAC0-D730-4D16-91D1-3235CF238498}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "cloud-connector-windows-gui.Core", "src\cloud-connector-windows-gui.Core\cloud-connector-windows-gui.Core.csproj", "{253BDAC0-D730-4D16-91D1-3235CF238498}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CloudConnectorWin.Core.Tests", "tests\CloudConnectorWin.Core.Tests\CloudConnectorWin.Core.Tests.csproj", "{35778909-65F0-4527-BFF3-06968D39CD56}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "cloud-connector-windows-gui.Core.Tests", "tests\cloud-connector-windows-gui.Core.Tests\cloud-connector-windows-gui.Core.Tests.csproj", "{35778909-65F0-4527-BFF3-06968D39CD56}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -28,4 +28,3 @@ Global
 		{35778909-65F0-4527-BFF3-06968D39CD56}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
-

@@ -1,4 +1,4 @@
-namespace CloudConnectorWin;
+namespace CloudConnectorWindowsGui;
 
 internal static class Program
 {
@@ -9,4 +9,3 @@ internal static class Program
         Application.Run(new MainForm());
     }
 }
-

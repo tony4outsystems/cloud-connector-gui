@@ -6,12 +6,12 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
-    <AssemblyName>CloudConnectorWin</AssemblyName>
-    <RootNamespace>CloudConnectorWin</RootNamespace>
+    <AssemblyName>cloud-connector-windows-gui</AssemblyName>
+    <RootNamespace>CloudConnectorWindowsGui</RootNamespace>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CloudConnectorWin.Core\CloudConnectorWin.Core.csproj" />
+    <ProjectReference Include="..\cloud-connector-windows-gui.Core\cloud-connector-windows-gui.Core.csproj" />
   </ItemGroup>
 </Project>

@@ -1,6 +1,6 @@
-using CloudConnectorWin.Core;
+using CloudConnectorWindowsGui.Core;
 
-namespace CloudConnectorWin;
+namespace CloudConnectorWindowsGui;
 
 internal sealed class MainForm : Form
 {
@@ -257,4 +257,3 @@ internal sealed class MainForm : Form
         logTextBox.AppendText($"[{DateTime.Now:HH:mm:ss}] {line}{Environment.NewLine}");
     }
 }
-

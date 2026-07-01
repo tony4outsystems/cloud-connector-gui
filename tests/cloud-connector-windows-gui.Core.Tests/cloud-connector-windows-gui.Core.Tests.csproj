@@ -17,7 +17,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\CloudConnectorWin.Core\CloudConnectorWin.Core.csproj" />
+    <ProjectReference Include="..\..\src\cloud-connector-windows-gui.Core\cloud-connector-windows-gui.Core.csproj" />
   </ItemGroup>
 </Project>
-

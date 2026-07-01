@@ -1,4 +1,4 @@
-namespace CloudConnectorWin.Core;
+namespace CloudConnectorWindowsGui.Core;
 
 public static class ConnectorValidator
 {
@@ -53,4 +53,3 @@ public static class ConnectorValidator
         port = parsed;
     }
 }
-

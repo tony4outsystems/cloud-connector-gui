@@ -1,8 +1,8 @@
 using System.Diagnostics;
 
-using CloudConnectorWin.Core;
+using CloudConnectorWindowsGui.Core;
 
-namespace CloudConnectorWin;
+namespace CloudConnectorWindowsGui;
 
 internal sealed class ConnectorProcess
 {
@@ -90,4 +90,3 @@ internal sealed class ConnectorProcess
         }
     }
 }
-

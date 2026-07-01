@@ -1,4 +1,4 @@
-namespace CloudConnectorWin.Core;
+namespace CloudConnectorWindowsGui.Core;
 
 public sealed record LaunchOptions(
     string Address,
@@ -6,4 +6,3 @@ public sealed record LaunchOptions(
     IReadOnlyList<Endpoint> Endpoints,
     string? Proxy = null,
     bool Verbose = false);
-

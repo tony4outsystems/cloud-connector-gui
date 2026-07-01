@@ -1,4 +1,4 @@
-# Cloud Connector Windows Launcher
+# cloud-connector-windows-gui
 
 A small Windows-only graphical launcher for `outsystemscc.exe`.
 
@@ -29,6 +29,5 @@ The script publishes the self-contained Windows app to `artifacts/win-x64` and c
 ## Test
 
 ```sh
-dotnet test tests/CloudConnectorWin.Core.Tests/CloudConnectorWin.Core.Tests.csproj
+dotnet test tests/cloud-connector-windows-gui.Core.Tests/cloud-connector-windows-gui.Core.Tests.csproj
 ```
-

@@ -1,7 +1,7 @@
-using CloudConnectorWin.Core;
+using CloudConnectorWindowsGui.Core;
 using Xunit;
 
-namespace CloudConnectorWin.Core.Tests;
+namespace CloudConnectorWindowsGui.Core.Tests;
 
 public sealed class ConnectorArgumentsTests
 {
