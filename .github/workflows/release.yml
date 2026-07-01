@@ -64,10 +64,11 @@ jobs:
           if-no-files-found: error
 
       - name: Publish GitHub release
+        working-directory: ${{ env.GUI_REPO_PATH }}
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag_name || github.ref_name }}
-          RELEASE_ASSET: ${{ env.GUI_REPO_PATH }}/artifacts/${{ env.ARTIFACT_NAME }}.zip
+          RELEASE_ASSET: artifacts/${{ env.ARTIFACT_NAME }}.zip
         run: |
           if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
             gh release upload "$RELEASE_TAG" "$RELEASE_ASSET" --clobber
