@@ -21,6 +21,7 @@ internal sealed class MainForm : Form
     public MainForm()
     {
         Text = "OutSystems Cloud Connector";
+        Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath) ?? Icon;
         MinimumSize = new Size(920, 700);
         StartPosition = FormStartPosition.CenterScreen;
         AutoScaleMode = AutoScaleMode.Dpi;

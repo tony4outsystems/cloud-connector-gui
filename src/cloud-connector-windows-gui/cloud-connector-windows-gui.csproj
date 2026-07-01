@@ -9,6 +9,7 @@
     <AssemblyName>cloud-connector-windows-gui</AssemblyName>
     <RootNamespace>CloudConnectorWindowsGui</RootNamespace>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <ApplicationIcon>Assets\outsystems.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
