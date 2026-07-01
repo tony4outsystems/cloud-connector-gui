@@ -20,6 +20,7 @@ internal sealed class MainForm : Form
     private readonly TextBox logTextBox = new();
     private readonly ConnectorProcess connector = new();
     private readonly CloudConnectorBinaryManager binaryManager = new();
+    private readonly TableLayoutPanel root = new();
 
     public MainForm()
     {
@@ -33,17 +34,25 @@ internal sealed class MainForm : Form
         BuildLayout();
         WireEvents();
         SetRunningState(false);
+
+        Load += (_, _) => ApplyMinimumSize();
+    }
+
+    private void ApplyMinimumSize()
+    {
+        var requiredContentHeight = root.GetPreferredSize(new Size(ClientSize.Width, 0)).Height;
+        var chromeHeight = Height - ClientSize.Height;
+        var requiredHeight = requiredContentHeight + chromeHeight;
+
+        MinimumSize = new Size(MinimumSize.Width, Math.Max(MinimumSize.Height, requiredHeight));
     }
 
     private void BuildLayout()
     {
-        var root = new TableLayoutPanel
-        {
-            Dock = DockStyle.Fill,
-            Padding = new Padding(16),
-            ColumnCount = 1,
-            RowCount = 6
-        };
+        root.Dock = DockStyle.Fill;
+        root.Padding = new Padding(16);
+        root.ColumnCount = 1;
+        root.RowCount = 6;
         root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
@@ -203,6 +212,31 @@ internal sealed class MainForm : Form
             Name = "RemotePort",
             Width = 130
         });
+        endpointsGrid.Columns.Add(new DataGridViewButtonColumn
+        {
+            HeaderText = string.Empty,
+            Name = "Remove",
+            Text = "Remove",
+            UseColumnTextForButtonValue = true,
+            Width = 90
+        });
+        endpointsGrid.CellContentClick += EndpointsGrid_CellContentClick;
+    }
+
+    private void EndpointsGrid_CellContentClick(object? sender, DataGridViewCellEventArgs e)
+    {
+        if (e.RowIndex < 0 || endpointsGrid.Columns[e.ColumnIndex].Name != "Remove")
+        {
+            return;
+        }
+
+        var row = endpointsGrid.Rows[e.RowIndex];
+        if (row.IsNewRow)
+        {
+            return;
+        }
+
+        endpointsGrid.Rows.Remove(row);
     }
 
     private void WireEvents()
@@ -372,12 +406,12 @@ internal sealed class MainForm : Form
             var current = status.CurrentVersion ?? "not installed";
             var latest = status.LatestVersion;
             var suffix = status.IsLatest ? "up to date" : "update available";
-            binaryVersionLabel.Text = $"Connector binary: current {current} / latest {latest} ({suffix})";
+            binaryVersionLabel.Text = $"current {current} / latest {latest} ({suffix})";
         }
         catch (Exception ex) when (ex is HttpRequestException or IOException or InvalidOperationException)
         {
             var current = binaryManager.InstalledVersion ?? "not installed";
-            binaryVersionLabel.Text = $"Connector binary: current {current} / latest unavailable";
+            binaryVersionLabel.Text = $"current {current} / latest unavailable";
             AppendLog($"Version check failed: {ex.Message}");
         }
         finally
