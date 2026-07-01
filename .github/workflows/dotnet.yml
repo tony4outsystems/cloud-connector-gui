@@ -28,6 +28,9 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
+      - name: Install MAUI workload
+        run: dotnet workload install maui-windows
+
       - name: Restore
         run: dotnet restore cloud-connector-windows-gui.sln
 
@@ -40,9 +43,11 @@ jobs:
       - name: Publish Windows x64 GUI
         run: >
           dotnet publish src/cloud-connector-windows-gui/cloud-connector-windows-gui.csproj
+          --framework net10.0-windows10.0.19041.0
           --configuration Release
-          --runtime win-x64
+          --runtime win10-x64
           --self-contained true
+          -p:WindowsPackageType=None
           --output artifacts/win-x64
 
       - name: Package artifact

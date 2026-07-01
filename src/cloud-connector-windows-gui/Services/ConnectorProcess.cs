@@ -2,7 +2,7 @@ using System.Diagnostics;
 
 using CloudConnectorWindowsGui.Core;
 
-namespace CloudConnectorWindowsGui;
+namespace CloudConnectorWindowsGui.Services;
 
 internal sealed class ConnectorProcess
 {

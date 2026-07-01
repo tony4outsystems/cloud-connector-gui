@@ -6,7 +6,7 @@
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build gui",
-      "program": "${workspaceFolder}/src/cloud-connector-windows-gui/bin/Debug/net10.0-windows/cloud-connector-windows-gui.exe",
+      "program": "${workspaceFolder}/src/cloud-connector-windows-gui/bin/Debug/net10.0-windows10.0.19041.0/win10-x64/cloud-connector-windows-gui.exe",
       "cwd": "${workspaceFolder}",
       "stopAtEntry": false,
       "console": "internalConsole"

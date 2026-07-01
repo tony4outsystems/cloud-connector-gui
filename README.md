@@ -1,6 +1,8 @@
 # cloud-connector-windows-gui
 
-A small Windows-only graphical launcher for `outsystemscc.exe`.
+A small Windows-only graphical launcher for `outsystemscc.exe`, built with **.NET MAUI**.
+
+> The screenshot below predates the .NET MAUI conversion and shows the previous WinForms UI.
 
 ![OutSystems Cloud Connector GUI screenshot](docs/app-screenshot.png)
 
@@ -28,14 +30,18 @@ when GitHub provides one.
 
 ## Build
 
-Install .NET 10 SDK, then run:
+Install the .NET 10 SDK and the MAUI Windows workload, then run:
 
 ```sh
+dotnet workload install maui-windows
 ./scripts/publish-win-x64.sh
 ```
 
 The script publishes the self-contained Windows app to `artifacts/win-x64`. The connector binary is
 downloaded by the app at runtime.
+
+Building the Windows target requires a Windows machine with the MAUI Windows workload installed
+(the GitHub Actions workflows run on `windows-latest` for this reason).
 
 ## Release
 

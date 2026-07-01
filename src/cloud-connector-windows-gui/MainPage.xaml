@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:CloudConnectorWindowsGui.ViewModels"
+             x:Class="CloudConnectorWindowsGui.MainPage"
+             x:DataType="vm:MainViewModel">
+
+    <Grid Padding="24" RowSpacing="16" RowDefinitions="Auto,Auto,*,*">
+
+        <!-- Header -->
+        <VerticalStackLayout Grid.Row="0" Spacing="2">
+            <Label Text="OutSystems Cloud Connector" FontSize="24" FontAttributes="Bold"
+                   TextColor="{AppThemeBinding Light={StaticResource LightTextPrimary}, Dark={StaticResource DarkTextPrimary}}" />
+            <Label Text="Launch and manage the outsystemscc private gateway tunnel." FontSize="13"
+                   TextColor="{AppThemeBinding Light={StaticResource LightTextSecondary}, Dark={StaticResource DarkTextSecondary}}" />
+        </VerticalStackLayout>
+
+        <!-- Connection + binary card -->
+        <Border Grid.Row="1" Style="{StaticResource CardBorder}">
+            <VerticalStackLayout Spacing="12">
+
+                <Grid ColumnDefinitions="120,*" RowDefinitions="Auto,Auto,Auto" RowSpacing="10" ColumnSpacing="12">
+                    <Label Grid.Row="0" Grid.Column="0" Text="Address" Style="{StaticResource FieldLabel}" />
+                    <Entry Grid.Row="0" Grid.Column="1" Text="{Binding Address}" IsEnabled="{Binding IsRunning, Converter={StaticResource InvertedBoolConverter}}"
+                           Placeholder="https://organization.outsystems.app/sg_..." />
+
+                    <Label Grid.Row="1" Grid.Column="0" Text="Token" Style="{StaticResource FieldLabel}" />
+                    <Entry Grid.Row="1" Grid.Column="1" Text="{Binding Token}" IsPassword="True" IsEnabled="{Binding IsRunning, Converter={StaticResource InvertedBoolConverter}}" />
+
+                    <Label Grid.Row="2" Grid.Column="0" Text="Proxy" Style="{StaticResource FieldLabel}" />
+                    <Entry Grid.Row="2" Grid.Column="1" Text="{Binding Proxy}" IsEnabled="{Binding IsRunning, Converter={StaticResource InvertedBoolConverter}}"
+                           Placeholder="Optional HTTP CONNECT or SOCKS5 proxy" />
+                </Grid>
+
+                <HorizontalStackLayout Spacing="10">
+                    <Switch IsToggled="{Binding Verbose}" IsEnabled="{Binding IsRunning, Converter={StaticResource InvertedBoolConverter}}" />
+                    <Label Text="Verbose logs" VerticalOptions="Center"
+                           TextColor="{AppThemeBinding Light={StaticResource LightTextPrimary}, Dark={StaticResource DarkTextPrimary}}" />
+                </HorizontalStackLayout>
+
+                <BoxView HeightRequest="1" Color="{AppThemeBinding Light={StaticResource LightBorder}, Dark={StaticResource DarkBorder}}" />
+
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                    <Button Grid.Column="0" Text="Download / Update Binary" Style="{StaticResource SecondaryButton}"
+                            Command="{Binding UpdateBinaryCommand}" />
+                    <Label Grid.Column="1" Text="{Binding BinaryVersionText}" VerticalOptions="Center"
+                           TextColor="{AppThemeBinding Light={StaticResource LightTextSecondary}, Dark={StaticResource DarkTextSecondary}}" />
+                </Grid>
+            </VerticalStackLayout>
+        </Border>
+
+        <!-- Endpoints card -->
+        <Border Grid.Row="2" Style="{StaticResource CardBorder}">
+            <Grid RowDefinitions="Auto,Auto,*,Auto" RowSpacing="10">
+                <Label Grid.Row="0" Text="TCP Endpoints" Style="{StaticResource SectionHeading}" Margin="0" />
+
+                <Grid Grid.Row="1" ColumnDefinitions="*,*,*,40" ColumnSpacing="10">
+                    <Label Grid.Column="0" Text="LOCAL PORT" FontSize="11" FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light={StaticResource LightTextSecondary}, Dark={StaticResource DarkTextSecondary}}" />
+                    <Label Grid.Column="1" Text="REMOTE HOST" FontSize="11" FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light={StaticResource LightTextSecondary}, Dark={StaticResource DarkTextSecondary}}" />
+                    <Label Grid.Column="2" Text="REMOTE PORT" FontSize="11" FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light={StaticResource LightTextSecondary}, Dark={StaticResource DarkTextSecondary}}" />
+                </Grid>
+
+                <CollectionView Grid.Row="2" ItemsSource="{Binding Endpoints}" VerticalOptions="Fill">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="vm:EndpointRowViewModel">
+                            <Grid ColumnDefinitions="*,*,*,40" ColumnSpacing="10" Padding="0,4">
+                                <Entry Grid.Column="0" Text="{Binding LocalPort}" IsEnabled="{Binding IsReadOnly, Converter={StaticResource InvertedBoolConverter}}"
+                                       Placeholder="8080" Keyboard="Numeric" />
+                                <Entry Grid.Column="1" Text="{Binding RemoteHost}" IsEnabled="{Binding IsReadOnly, Converter={StaticResource InvertedBoolConverter}}"
+                                       Placeholder="internal-service.local" />
+                                <Entry Grid.Column="2" Text="{Binding RemotePort}" IsEnabled="{Binding IsReadOnly, Converter={StaticResource InvertedBoolConverter}}"
+                                       Placeholder="443" Keyboard="Numeric" />
+                                <Button Grid.Column="3" Text="&#x2715;" Style="{StaticResource IconButton}"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveEndpointCommand}"
+                                        CommandParameter="{Binding .}" />
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+                <Button Grid.Row="3" Text="+ Add endpoint" Style="{StaticResource SecondaryButton}" HorizontalOptions="Start"
+                        Command="{Binding AddEndpointCommand}" />
+            </Grid>
+        </Border>
+
+        <!-- Log + actions card -->
+        <Border Grid.Row="3" Style="{StaticResource CardBorder}">
+            <Grid RowDefinitions="Auto,*" RowSpacing="10">
+                <Grid Grid.Row="0" ColumnDefinitions="Auto,Auto,Auto,*" ColumnSpacing="10">
+                    <Button Grid.Column="0" Text="Start" Style="{StaticResource PrimaryButton}" Command="{Binding StartCommand}" WidthRequest="110" />
+                    <Button Grid.Column="1" Text="Stop" Style="{StaticResource DangerButton}" Command="{Binding StopCommand}" WidthRequest="110" />
+
+                    <HorizontalStackLayout Grid.Column="2" Spacing="8" VerticalOptions="Center" Margin="10,0,0,0">
+                        <BoxView WidthRequest="10" HeightRequest="10" CornerRadius="5" Color="{Binding StatusColor}" VerticalOptions="Center" />
+                        <Label Text="{Binding StatusText}" VerticalOptions="Center" FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light={StaticResource LightTextPrimary}, Dark={StaticResource DarkTextPrimary}}" />
+                    </HorizontalStackLayout>
+                </Grid>
+
+                <Border Grid.Row="1" Stroke="{AppThemeBinding Light={StaticResource LightBorder}, Dark={StaticResource DarkBorder}}"
+                        StrokeThickness="1" StrokeShape="RoundRectangle 10"
+                        Background="{AppThemeBinding Light={StaticResource LightSurfaceAlt}, Dark={StaticResource DarkSurfaceAlt}}"
+                        Padding="12">
+                    <CollectionView x:Name="LogCollectionView" ItemsSource="{Binding LogLines}">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="x:String">
+                                <Label Text="{Binding .}" FontFamily="Consolas" FontSize="12"
+                                       TextColor="{AppThemeBinding Light={StaticResource LightTextPrimary}, Dark={StaticResource DarkTextPrimary}}"
+                                       LineBreakMode="TailTruncation" />
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </Border>
+            </Grid>
+        </Border>
+
+    </Grid>
+</ContentPage>
