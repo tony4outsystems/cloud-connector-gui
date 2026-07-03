@@ -15,7 +15,16 @@
       "Bash(dotnet restore *)",
       "Bash(git rm *)",
       "Bash(git tag *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Skill(run)",
+      "Skill(run:*)",
+      "Bash(nohup dotnet bin/Debug/net10.0/cloud-connector-gui.dll)",
+      "Bash(echo \"PID: $!\")",
+      "Read(//private/tmp/**)",
+      "mcp__avalonia_devtools__attach-to-app",
+      "mcp__avalonia_devtools__tree",
+      "mcp__avalonia_devtools__screenshot",
+      "Bash(git stash *)"
     ]
   }
 }
