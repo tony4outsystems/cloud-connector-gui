@@ -31,10 +31,15 @@ when GitHub provides one.
 Install .NET 10 SDK, then run:
 
 ```sh
-./scripts/publish-win-x64.sh
+dotnet test tests/cloud-connector-windows-gui.Core.Tests/cloud-connector-windows-gui.Core.Tests.csproj
+dotnet publish src/cloud-connector-windows-gui/cloud-connector-windows-gui.csproj \
+  -c Release \
+  -r win-x64 \
+  --self-contained true \
+  -o artifacts/win-x64
 ```
 
-The script publishes the self-contained Windows app to `artifacts/win-x64`. The connector binary is
+The publish command writes the self-contained Windows app to `artifacts/win-x64`. The connector binary is
 downloaded by the app at runtime.
 
 ## Release
