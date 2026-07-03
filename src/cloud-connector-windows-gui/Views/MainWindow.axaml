@@ -8,13 +8,22 @@
         Width="1000" Height="840"
         MinWidth="920" MinHeight="800"
         WindowStartupLocation="CenterScreen">
-    <Grid Margin="16" RowDefinitions="Auto,Auto,Auto,*,Auto,3*">
-        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,12">
+    <Grid Margin="16" RowDefinitions="Auto,Auto,Auto,Auto,*,Auto,3*">
+        <Menu Grid.Row="0" Margin="0,0,0,8" IsVisible="{Binding !IsMacOS}">
+            <MenuItem Header="_File">
+                <MenuItem Header="_Configuration..." Command="{Binding OpenConfigurationCommand}" />
+            </MenuItem>
+            <MenuItem Header="_Help">
+                <MenuItem Header="_About OutSystems Cloud Connector" Command="{Binding OpenAboutCommand}" />
+            </MenuItem>
+        </Menu>
+
+        <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Margin="0,0,0,12">
             <TextBlock Grid.Column="0" Text="OutSystems Cloud Connector" FontWeight="Bold" VerticalAlignment="Center" />
-            <Button Grid.Column="1" Content="Configuration" Command="{Binding OpenConfigurationCommand}" />
+            <Button Grid.Column="1" Content="Configuration" Command="{Binding OpenConfigurationCommand}" IsVisible="{Binding !IsMacOS}" />
         </Grid>
 
-        <Border Grid.Row="1"
+        <Border Grid.Row="2"
                 Background="#FFF8D2"
                 Padding="12"
                 Margin="0,0,0,12"
@@ -26,7 +35,7 @@
             </Grid>
         </Border>
 
-        <Grid Grid.Row="2" ColumnDefinitions="110,*" RowDefinitions="Auto,Auto,Auto,Auto">
+        <Grid Grid.Row="3" ColumnDefinitions="110,*" RowDefinitions="Auto,Auto,Auto,Auto">
             <TextBlock Grid.Row="0" Grid.Column="0" Text="Address" VerticalAlignment="Center" Margin="0,4,8,4" />
             <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Address}" PlaceholderText="https://organization.outsystems.app/sg_..." IsEnabled="{Binding CanEditConfiguration}" Margin="0,4" />
 
@@ -39,7 +48,7 @@
             <CheckBox Grid.Row="3" Grid.Column="1" Content="Verbose logs" IsChecked="{Binding Verbose}" IsEnabled="{Binding CanEditConfiguration}" Margin="0,8,0,10" />
         </Grid>
 
-        <Grid Grid.Row="3" RowDefinitions="*,Auto" MinHeight="220">
+        <Grid Grid.Row="4" RowDefinitions="*,Auto" MinHeight="220">
             <DataGrid Grid.Row="0"
                       ItemsSource="{Binding Endpoints}"
                       IsReadOnly="False"
@@ -65,13 +74,13 @@
             <Button Grid.Row="1" Content="Add endpoint" Command="{Binding AddEndpointCommand}" IsEnabled="{Binding CanEditConfiguration}" Margin="0,8,0,0" HorizontalAlignment="Left" />
         </Grid>
 
-        <Grid Grid.Row="4" ColumnDefinitions="Auto,Auto,*" Margin="0,12,0,12">
+        <Grid Grid.Row="5" ColumnDefinitions="Auto,Auto,*" Margin="0,12,0,12">
             <Button Grid.Column="0" Content="Start" Command="{Binding StartConnectorCommand}" IsEnabled="{Binding CanStart}" MinWidth="100" Margin="0,0,6,0" />
             <Button Grid.Column="1" Content="Stop" Command="{Binding StopConnectorCommand}" IsEnabled="{Binding CanStop}" MinWidth="100" Margin="0,0,6,0" />
             <TextBlock Grid.Column="2" Text="{Binding StatusText}" VerticalAlignment="Center" Margin="16,0,0,0" />
         </Grid>
 
-        <TextBox Grid.Row="5"
+        <TextBox Grid.Row="6"
                  Text="{Binding LogText}"
                  IsReadOnly="True"
                  AcceptsReturn="True"

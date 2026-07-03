@@ -5,6 +5,8 @@
              RequestedThemeVariant="Default">
     <NativeMenu.Menu>
         <NativeMenu>
+            <NativeMenuItem Header="About OutSystems Cloud Connector" Click="About_OnClick" />
+            <NativeMenuItemSeparator />
             <NativeMenuItem Header="Preferences..." Click="Preferences_OnClick" Gesture="Meta+OemComma" />
         </NativeMenu>
     </NativeMenu.Menu>

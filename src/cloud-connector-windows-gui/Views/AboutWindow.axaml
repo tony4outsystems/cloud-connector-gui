@@ -1,0 +1,15 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="CloudConnectorWindowsGui.Views.AboutWindow"
+        Title="About OutSystems Cloud Connector"
+        Width="360" SizeToContent="Height"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False">
+    <StackPanel Margin="24" Spacing="8" HorizontalAlignment="Center">
+        <Image Source="/Assets/outsystems.ico" Width="64" Height="64" HorizontalAlignment="Center" Margin="0,0,0,8" />
+        <TextBlock Text="OutSystems Cloud Connector" FontWeight="Bold" FontSize="16" HorizontalAlignment="Center" />
+        <TextBlock Name="VersionText" HorizontalAlignment="Center" />
+        <Button Name="OkButton" Content="OK" HorizontalAlignment="Center" MinWidth="80" IsDefault="True" IsCancel="True" />
+    </StackPanel>
+</Window>

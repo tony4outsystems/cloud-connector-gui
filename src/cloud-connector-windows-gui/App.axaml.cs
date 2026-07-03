@@ -33,4 +33,12 @@ public sealed class GuiApplication : Application
             viewModel.OpenConfigurationCommand.Execute(null);
         }
     }
+
+    private void About_OnClick(object? sender, System.EventArgs args)
+    {
+        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime { MainWindow: MainWindow { DataContext: MainWindowViewModel viewModel } })
+        {
+            viewModel.OpenAboutCommand.Execute(null);
+        }
+    }
 }

@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <AssemblyName>cloud-connector-windows-gui</AssemblyName>
     <RootNamespace>CloudConnectorWindowsGui</RootNamespace>
+    <MinVerTagPrefix>v</MinVerTagPrefix>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <ApplicationIcon>Assets\outsystems.ico</ApplicationIcon>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
@@ -22,6 +23,9 @@
     <PackageReference Include="Avalonia.Fonts.Inter" Version="12.0.5" />
     <PackageReference Include="Avalonia.Controls.DataGrid" Version="12.0.1" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageReference Include="MinVer" Version="6.0.0">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>

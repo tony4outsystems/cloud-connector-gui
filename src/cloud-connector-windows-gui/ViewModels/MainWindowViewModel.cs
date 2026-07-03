@@ -17,6 +17,8 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
     public Window? OwnerWindow { get; set; }
 
+    public bool IsMacOS { get; } = OperatingSystem.IsMacOS();
+
     public IReadOnlyList<string> SelfUpdateIntervalOptions { get; } = SelfUpdateIntervals.All;
 
     public ObservableCollection<EndpointRowViewModel> Endpoints { get; } = [];
@@ -314,6 +316,15 @@ public sealed partial class MainWindowViewModel : ObservableObject
         if (OwnerWindow is not null)
         {
             await ConfigurationWindow.ShowAsync(OwnerWindow, this).ConfigureAwait(true);
+        }
+    }
+
+    [RelayCommand]
+    private async Task OpenAboutAsync()
+    {
+        if (OwnerWindow is not null)
+        {
+            await AboutWindow.ShowAsync(OwnerWindow).ConfigureAwait(true);
         }
     }
 
