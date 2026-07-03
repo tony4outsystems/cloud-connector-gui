@@ -309,6 +309,15 @@ public sealed partial class MainWindowViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private async Task OpenConfigurationAsync()
+    {
+        if (OwnerWindow is not null)
+        {
+            await ConfigurationWindow.ShowAsync(OwnerWindow, this).ConfigureAwait(true);
+        }
+    }
+
+    [RelayCommand]
     private void HideSelfUpdateBanner()
     {
         state.HideSelfUpdate();

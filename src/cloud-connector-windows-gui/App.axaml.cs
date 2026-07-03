@@ -25,4 +25,12 @@ public sealed class GuiApplication : Application
 
         base.OnFrameworkInitializationCompleted();
     }
+
+    private void Preferences_OnClick(object? sender, System.EventArgs args)
+    {
+        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime { MainWindow: MainWindow { DataContext: MainWindowViewModel viewModel } })
+        {
+            viewModel.OpenConfigurationCommand.Execute(null);
+        }
+    }
 }
