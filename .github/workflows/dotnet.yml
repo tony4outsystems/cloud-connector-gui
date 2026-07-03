@@ -95,8 +95,8 @@ jobs:
           --channel ${{ matrix.rid }}
           --noInst
 
-      - name: Pack (macOS/Linux, portable only)
-        if: runner.os != 'Windows'
+      - name: Pack (macOS, portable only)
+        if: runner.os == 'macOS'
         run: >
           vpk pack
           --packId cloud-connector-gui
@@ -106,6 +106,17 @@ jobs:
           --outputDir release/${{ matrix.rid }}
           --channel ${{ matrix.rid }}
           --noInst
+
+      - name: Pack (Linux, portable AppImage)
+        if: runner.os == 'Linux'
+        run: >
+          vpk pack
+          --packId cloud-connector-gui
+          --packVersion ${{ steps.version.outputs.version }}
+          --packDir artifacts/${{ matrix.rid }}
+          --mainExe cloud-connector-gui
+          --outputDir release/${{ matrix.rid }}
+          --channel ${{ matrix.rid }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
