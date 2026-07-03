@@ -1,13 +1,9 @@
-- keep configuration between runs of the gui in a toml file (location where the gui executable is) .
-commits
-
 - prevent running more than one instance
 commits
 
 - logs saved in a file (location where th executable of the gui is)
 commits
 
-- auto update on startup, daily/ weekly/monthly/off is part of the configuration
 - install / uninstall as service
   - save the current configuration to the correct location in the windows system
   - standalone. executable and configuration is copied in the correct location on the system

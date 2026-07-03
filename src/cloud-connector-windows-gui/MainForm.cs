@@ -11,6 +11,7 @@ internal sealed class MainForm : Form
     private readonly TextBox tokenTextBox = new();
     private readonly TextBox proxyTextBox = new();
     private readonly CheckBox verboseCheckBox = new();
+    private readonly ComboBox autoUpdateComboBox = new();
     private readonly DataGridView endpointsGrid = new();
     private readonly Button startButton = new();
     private readonly Button stopButton = new();
@@ -20,7 +21,9 @@ internal sealed class MainForm : Form
     private readonly TextBox logTextBox = new();
     private readonly ConnectorProcess connector = new();
     private readonly CloudConnectorBinaryManager binaryManager = new();
+    private readonly GuiConfigurationStore configurationStore = new();
     private readonly TableLayoutPanel root = new();
+    private DateOnly? lastUpdateCheck;
 
     public MainForm()
     {
@@ -35,7 +38,11 @@ internal sealed class MainForm : Form
         WireEvents();
         SetRunningState(false);
 
-        Load += (_, _) => ApplyMinimumSize();
+        Load += (_, _) =>
+        {
+            LoadConfiguration();
+            ApplyMinimumSize();
+        };
     }
 
     private void ApplyMinimumSize()
@@ -84,10 +91,14 @@ internal sealed class MainForm : Form
         AddLabeledControl(inputs, "Address", addressTextBox);
         AddLabeledControl(inputs, "Token", tokenTextBox);
         AddLabeledControl(inputs, "Proxy", proxyTextBox);
+        AddLabeledControl(inputs, "Auto update", autoUpdateComboBox);
 
         tokenTextBox.UseSystemPasswordChar = true;
         proxyTextBox.PlaceholderText = "Optional HTTP CONNECT or SOCKS5 proxy";
         addressTextBox.PlaceholderText = "https://organization.outsystems.app/sg_...";
+        autoUpdateComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+        autoUpdateComboBox.Items.AddRange(["daily", "weekly", "monthly", "off"]);
+        autoUpdateComboBox.SelectedItem = "daily";
 
         verboseCheckBox.Text = "Verbose logs";
         verboseCheckBox.AutoSize = true;
@@ -164,7 +175,7 @@ internal sealed class MainForm : Form
         button.Margin = new Padding(3, 3, 6, 3);
     }
 
-    private static void AddLabeledControl(TableLayoutPanel panel, string label, TextBox textBox)
+    private static void AddLabeledControl(TableLayoutPanel panel, string label, Control control)
     {
         panel.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         panel.Controls.Add(new Label
@@ -175,10 +186,10 @@ internal sealed class MainForm : Form
             Margin = new Padding(0, 7, 8, 7)
         });
 
-        textBox.Dock = DockStyle.Top;
-        textBox.MinimumSize = new Size(0, 32);
-        textBox.Margin = new Padding(0, 4, 0, 4);
-        panel.Controls.Add(textBox);
+        control.Dock = DockStyle.Top;
+        control.MinimumSize = new Size(0, 32);
+        control.Margin = new Padding(0, 4, 0, 4);
+        panel.Controls.Add(control);
     }
 
     private void ConfigureEndpointGrid()
@@ -253,10 +264,11 @@ internal sealed class MainForm : Form
         Shown += async (_, _) =>
         {
             await RefreshBinaryVersionAsync().ConfigureAwait(true);
-            await InstallOrUpdateBinaryAsync(force: false).ConfigureAwait(true);
+            await InstallOrUpdateBinaryOnScheduleAsync().ConfigureAwait(true);
         };
         FormClosing += async (_, args) =>
         {
+            SaveConfiguration();
             if (connector.IsRunning)
             {
                 args.Cancel = true;
@@ -278,6 +290,8 @@ internal sealed class MainForm : Form
 
         try
         {
+            SaveConfiguration(options);
+
             if (!File.Exists(binaryManager.ExecutablePath))
             {
                 MessageBox.Show("The connector binary is not installed yet. Use Download / Update Binary first.", "Cannot start connector", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -314,6 +328,65 @@ internal sealed class MainForm : Form
             verboseCheckBox.Checked);
     }
 
+    private void LoadConfiguration()
+    {
+        try
+        {
+            ApplyConfiguration(configurationStore.Load());
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or FormatException)
+        {
+            AppendLog($"Configuration load failed: {ex.Message}");
+        }
+    }
+
+    private void ApplyConfiguration(GuiConfiguration configuration)
+    {
+        addressTextBox.Text = configuration.Address;
+        tokenTextBox.Text = configuration.Token;
+        proxyTextBox.Text = configuration.Proxy;
+        verboseCheckBox.Checked = configuration.Verbose;
+        autoUpdateComboBox.SelectedItem = configuration.AutoUpdate;
+        if (autoUpdateComboBox.SelectedItem is null)
+        {
+            autoUpdateComboBox.SelectedItem = "daily";
+        }
+
+        lastUpdateCheck = configuration.LastUpdateCheck;
+        endpointsGrid.Rows.Clear();
+
+        foreach (var endpoint in configuration.Endpoints)
+        {
+            endpointsGrid.Rows.Add(endpoint.LocalPort, endpoint.RemoteHost, endpoint.RemotePort);
+        }
+    }
+
+    private void SaveConfiguration()
+    {
+        SaveConfiguration(ReadOptions());
+    }
+
+    private void SaveConfiguration(LaunchOptions options)
+    {
+        try
+        {
+            configurationStore.Save(ReadConfiguration(options));
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            AppendLog($"Configuration save failed: {ex.Message}");
+        }
+    }
+
+    private GuiConfiguration ReadConfiguration(LaunchOptions options)
+    {
+        return GuiConfiguration.FromLaunchOptions(options, new GuiConfiguration
+        {
+            AutoUpdate = Convert.ToString(autoUpdateComboBox.SelectedItem) ?? "daily",
+            LastUpdateCheck = lastUpdateCheck
+        });
+    }
+
     private IReadOnlyList<Endpoint> ReadEndpoints()
     {
         var endpoints = new List<Endpoint>();
@@ -348,6 +421,7 @@ internal sealed class MainForm : Form
         addressTextBox.ReadOnly = running;
         tokenTextBox.ReadOnly = running;
         proxyTextBox.ReadOnly = running;
+        autoUpdateComboBox.Enabled = !running;
         verboseCheckBox.Enabled = !running;
         updateBinaryButton.Enabled = !running;
     }
@@ -380,6 +454,12 @@ internal sealed class MainForm : Form
                 AppendLog($"Installed outsystemscc {result.Version}.");
             }
 
+            if (!force)
+            {
+                lastUpdateCheck = DateOnly.FromDateTime(DateTime.UtcNow);
+                SaveConfiguration();
+            }
+
             await RefreshBinaryVersionAsync().ConfigureAwait(true);
         }
         catch (Exception ex) when (ex is HttpRequestException or IOException or InvalidOperationException or UnauthorizedAccessException)
@@ -395,6 +475,41 @@ internal sealed class MainForm : Form
             statusLabel.Text = previousStatus;
             SetRunningState(connector.IsRunning);
         }
+    }
+
+    private async Task InstallOrUpdateBinaryOnScheduleAsync()
+    {
+        var configuration = ReadConfiguration(ReadOptions());
+        if (!IsAutoUpdateDue(configuration))
+        {
+            AppendLog($"Auto update is {configuration.AutoUpdate}; skipping startup update check.");
+            return;
+        }
+
+        await InstallOrUpdateBinaryAsync(force: false).ConfigureAwait(true);
+    }
+
+    private static bool IsAutoUpdateDue(GuiConfiguration configuration)
+    {
+        if (configuration.AutoUpdate == "off")
+        {
+            return false;
+        }
+
+        if (configuration.LastUpdateCheck is null)
+        {
+            return true;
+        }
+
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var nextCheck = configuration.AutoUpdate switch
+        {
+            "weekly" => configuration.LastUpdateCheck.Value.AddDays(7),
+            "monthly" => configuration.LastUpdateCheck.Value.AddMonths(1),
+            _ => configuration.LastUpdateCheck.Value.AddDays(1)
+        };
+
+        return today >= nextCheck;
     }
 
     private async Task RefreshBinaryVersionAsync()
