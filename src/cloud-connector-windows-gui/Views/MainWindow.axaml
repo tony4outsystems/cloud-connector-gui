@@ -8,7 +8,7 @@
         Width="1000" Height="840"
         MinWidth="920" MinHeight="800"
         WindowStartupLocation="CenterScreen">
-    <Grid Margin="16" RowDefinitions="Auto,Auto,Auto,Auto,*,Auto,3*">
+    <Grid Margin="16" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,*">
         <Menu Grid.Row="0" Margin="0,0,0,8" IsVisible="{Binding !IsMacOS}">
             <MenuItem Header="_File">
                 <MenuItem Header="_Configuration..." Command="{Binding OpenConfigurationCommand}" />
