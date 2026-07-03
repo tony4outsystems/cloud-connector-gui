@@ -1,24 +1,28 @@
+using CloudConnectorWindowsGui.App;
 using CloudConnectorWindowsGui.Core;
 
 namespace CloudConnectorWindowsGui;
 
 internal sealed partial class MainForm
 {
-    private LaunchOptions ReadOptions()
+    private void CaptureStateFromControls()
     {
-        return new LaunchOptions(
-            addressTextBox.Text,
-            tokenTextBox.Text,
-            ReadEndpoints(),
-            proxyTextBox.Text,
-            verboseCheckBox.Checked);
+        state.Address = addressTextBox.Text;
+        state.Token = tokenTextBox.Text;
+        state.Proxy = proxyTextBox.Text;
+        state.Verbose = verboseCheckBox.Checked;
+        state.SelfUpdateCheckInterval = Convert.ToString(selfUpdateCheckIntervalComboBox.SelectedItem) ?? SelfUpdateIntervals.Daily;
+        state.Endpoints.Clear();
+        state.Endpoints.AddRange(ReadEndpoints());
     }
 
     private void LoadConfiguration()
     {
         try
         {
-            ApplyConfiguration(configurationStore.Load());
+            state.ApplyConfiguration(controller.LoadConfiguration());
+            ApplyConfigurationToControls();
+            RenderState();
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or FormatException)
         {
@@ -26,22 +30,21 @@ internal sealed partial class MainForm
         }
     }
 
-    private void ApplyConfiguration(GuiConfiguration configuration)
+    private void ApplyConfigurationToControls()
     {
-        addressTextBox.Text = configuration.Address;
-        tokenTextBox.Text = configuration.Token;
-        proxyTextBox.Text = configuration.Proxy;
-        verboseCheckBox.Checked = configuration.Verbose;
-        selfUpdateCheckIntervalComboBox.SelectedItem = configuration.SelfUpdateCheckInterval;
+        addressTextBox.Text = state.Address;
+        tokenTextBox.Text = state.Token;
+        proxyTextBox.Text = state.Proxy;
+        verboseCheckBox.Checked = state.Verbose;
+        selfUpdateCheckIntervalComboBox.SelectedItem = state.SelfUpdateCheckInterval;
         if (selfUpdateCheckIntervalComboBox.SelectedItem is null)
         {
             selfUpdateCheckIntervalComboBox.SelectedItem = SelfUpdateIntervals.Daily;
         }
 
-        lastSelfUpdateCheck = configuration.LastSelfUpdateCheck;
         endpointsGrid.Rows.Clear();
 
-        foreach (var endpoint in configuration.Endpoints)
+        foreach (var endpoint in state.Endpoints)
         {
             endpointsGrid.Rows.Add(endpoint.LocalPort, endpoint.RemoteHost, endpoint.RemotePort);
         }
@@ -49,28 +52,15 @@ internal sealed partial class MainForm
 
     private void SaveConfiguration()
     {
-        SaveConfiguration(ReadOptions());
-    }
-
-    private void SaveConfiguration(LaunchOptions options)
-    {
         try
         {
-            configurationStore.Save(ReadConfiguration(options));
+            CaptureStateFromControls();
+            controller.SaveConfiguration(state);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
             AppendLog($"Configuration save failed: {ex.Message}");
         }
-    }
-
-    private GuiConfiguration ReadConfiguration(LaunchOptions options)
-    {
-        return GuiConfiguration.FromLaunchOptions(options, new GuiConfiguration
-        {
-            SelfUpdateCheckInterval = Convert.ToString(selfUpdateCheckIntervalComboBox.SelectedItem) ?? SelfUpdateIntervals.Daily,
-            LastSelfUpdateCheck = lastSelfUpdateCheck
-        });
     }
 
     private IReadOnlyList<Endpoint> ReadEndpoints()

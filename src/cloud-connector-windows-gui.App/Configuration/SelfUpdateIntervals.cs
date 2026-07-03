@@ -1,6 +1,6 @@
-namespace CloudConnectorWindowsGui;
+namespace CloudConnectorWindowsGui.App;
 
-internal static class SelfUpdateIntervals
+public static class SelfUpdateIntervals
 {
     public const string Daily = "daily";
     public const string Weekly = "weekly";

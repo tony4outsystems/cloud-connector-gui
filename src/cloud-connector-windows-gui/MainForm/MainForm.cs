@@ -1,3 +1,5 @@
+using CloudConnectorWindowsGui.App;
+
 namespace CloudConnectorWindowsGui;
 
 internal sealed partial class MainForm : Form
@@ -21,17 +23,13 @@ internal sealed partial class MainForm : Form
     private readonly Label binaryVersionLabel = new();
     private readonly Label statusLabel = new();
     private readonly TextBox logTextBox = new();
-    private readonly ConnectorProcess connector = new();
-    private readonly CloudConnectorBinaryManager binaryManager = new();
-    private readonly SelfUpdateManager selfUpdateManager = new();
-    private readonly GuiConfigurationStore configurationStore = new();
+    private readonly MainWindowController controller = new();
+    private readonly MainWindowState state = new();
     private readonly TableLayoutPanel root = new();
     private readonly string logFilePath = Path.Combine(
         Path.GetDirectoryName(Application.ExecutablePath) ?? AppContext.BaseDirectory,
         "cloud-connector-windows-gui.log");
     private bool logFileErrorShown;
-    private DateOnly? lastSelfUpdateCheck;
-    private SelfUpdateStatus? availableSelfUpdate;
 
     public MainForm()
     {
@@ -44,7 +42,7 @@ internal sealed partial class MainForm : Form
 
         BuildLayout();
         WireEvents();
-        SetRunningState(false);
+        RenderState();
 
         Load += (_, _) =>
         {
@@ -60,11 +58,12 @@ internal sealed partial class MainForm : Form
         updateBinaryButton.Click += async (_, _) => await InstallOrUpdateBinaryAsync(force: true).ConfigureAwait(true);
         selfUpdateButton.Click += async (_, _) => await ApplySelfUpdateAsync().ConfigureAwait(true);
         dismissSelfUpdateButton.Click += (_, _) => HideSelfUpdateBanner();
-        connector.OutputReceived += line => BeginInvoke(() => AppendLog(line));
-        connector.Exited += exitCode => BeginInvoke(() =>
+        controller.LogRequested += line => BeginInvoke(() => AppendLog(line));
+        controller.ConnectorExited += exitCode => BeginInvoke(() =>
         {
             AppendLog($"outsystemscc exited with code {exitCode}");
-            SetRunningState(false);
+            state.SetRunning(false);
+            RenderState();
         });
         Shown += async (_, _) =>
         {
@@ -74,7 +73,7 @@ internal sealed partial class MainForm : Form
         FormClosing += async (_, args) =>
         {
             SaveConfiguration();
-            if (connector.IsRunning)
+            if (controller.IsConnectorRunning)
             {
                 args.Cancel = true;
                 await StopConnectorAsync().ConfigureAwait(true);

@@ -1,8 +1,8 @@
 using CloudConnectorWindowsGui.Core;
 
-namespace CloudConnectorWindowsGui;
+namespace CloudConnectorWindowsGui.App;
 
-internal sealed class GuiConfiguration
+public sealed class GuiConfiguration
 {
     public string Address { get; init; } = string.Empty;
 

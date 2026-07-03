@@ -13,6 +13,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\cloud-connector-windows-gui.App\cloud-connector-windows-gui.App.csproj" />
     <ProjectReference Include="..\cloud-connector-windows-gui.Core\cloud-connector-windows-gui.Core.csproj" />
   </ItemGroup>
 </Project>

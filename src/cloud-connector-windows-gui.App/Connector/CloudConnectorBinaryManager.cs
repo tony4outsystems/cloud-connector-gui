@@ -4,9 +4,9 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 
-namespace CloudConnectorWindowsGui;
+namespace CloudConnectorWindowsGui.App;
 
-internal sealed class CloudConnectorBinaryManager
+public sealed class CloudConnectorBinaryManager
 {
     private const string ExecutableName = "outsystemscc.exe";
     private const string VersionFileName = "version.txt";
@@ -19,7 +19,7 @@ internal sealed class CloudConnectorBinaryManager
     {
     }
 
-    internal CloudConnectorBinaryManager(GitHubReleaseClient releaseClient, string installDirectory)
+    public CloudConnectorBinaryManager(GitHubReleaseClient releaseClient, string installDirectory)
     {
         this.releaseClient = releaseClient;
         this.installDirectory = installDirectory;

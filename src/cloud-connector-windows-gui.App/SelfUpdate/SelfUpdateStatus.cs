@@ -1,6 +1,6 @@
-namespace CloudConnectorWindowsGui;
+namespace CloudConnectorWindowsGui.App;
 
-internal sealed record SelfUpdateStatus(
+public sealed record SelfUpdateStatus(
     string CurrentVersion,
     string LatestVersion,
     bool IsUpdateAvailable,

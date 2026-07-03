@@ -2,9 +2,9 @@ using System.Globalization;
 using System.Text;
 using CloudConnectorWindowsGui.Core;
 
-namespace CloudConnectorWindowsGui;
+namespace CloudConnectorWindowsGui.App;
 
-internal sealed class GuiConfigurationStore
+public sealed class GuiConfigurationStore
 {
     private const string FileName = "cloud-connector-windows-gui.toml";
     private readonly string filePath;

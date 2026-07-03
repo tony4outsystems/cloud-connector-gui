@@ -1,9 +1,9 @@
 using System.Net.Http.Headers;
 using System.Text.Json;
 
-namespace CloudConnectorWindowsGui;
+namespace CloudConnectorWindowsGui.App;
 
-internal sealed class GitHubReleaseClient
+public sealed class GitHubReleaseClient
 {
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -19,7 +19,7 @@ internal sealed class GitHubReleaseClient
     {
     }
 
-    internal GitHubReleaseClient(HttpClient httpClient, string owner, string repository, string emptyReleaseMessage)
+    public GitHubReleaseClient(HttpClient httpClient, string owner, string repository, string emptyReleaseMessage)
     {
         this.httpClient = httpClient;
         releasesUrl = $"https://api.github.com/repos/{owner}/{repository}/releases";

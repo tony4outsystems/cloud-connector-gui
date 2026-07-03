@@ -1,25 +1,17 @@
+using CloudConnectorWindowsGui.App;
+
 namespace CloudConnectorWindowsGui;
 
 internal sealed partial class MainForm
 {
     private async Task CheckSelfUpdateAsync()
     {
-        var configuration = ReadConfiguration(ReadOptions());
-        if (!IsSelfUpdateCheckDue(configuration))
-        {
-            return;
-        }
-
+        CaptureStateFromControls();
         try
         {
-            var status = await selfUpdateManager.GetUpdateStatusAsync().ConfigureAwait(true);
-            lastSelfUpdateCheck = DateOnly.FromDateTime(DateTime.UtcNow);
-            SaveConfiguration();
-
-            if (status.IsUpdateAvailable)
-            {
-                ShowSelfUpdateBanner(status);
-            }
+            await controller.CheckSelfUpdateAsync(state).ConfigureAwait(true);
+            RenderState();
+            ApplyMinimumSize();
         }
         catch (Exception ex) when (ex is HttpRequestException or IOException or InvalidOperationException or UnauthorizedAccessException)
         {
@@ -29,12 +21,12 @@ internal sealed partial class MainForm
 
     private async Task ApplySelfUpdateAsync()
     {
-        if (availableSelfUpdate is null)
+        if (state.AvailableSelfUpdate is null)
         {
             return;
         }
 
-        if (connector.IsRunning)
+        if (controller.IsConnectorRunning)
         {
             MessageBox.Show("Stop the connector before updating the GUI.", "Connector is running", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return;
@@ -51,8 +43,8 @@ internal sealed partial class MainForm
                 AppendLog(message);
             });
 
-            SaveConfiguration();
-            await selfUpdateManager.ApplyUpdateAndRestartAsync(availableSelfUpdate, progress).ConfigureAwait(true);
+            CaptureStateFromControls();
+            await controller.ApplySelfUpdateAsync(state, progress).ConfigureAwait(true);
         }
         catch (Exception ex) when (ex is HttpRequestException or IOException or InvalidOperationException or UnauthorizedAccessException)
         {
@@ -64,42 +56,10 @@ internal sealed partial class MainForm
         }
     }
 
-    private void ShowSelfUpdateBanner(SelfUpdateStatus status)
-    {
-        availableSelfUpdate = status;
-        selfUpdateBannerLabel.Text = $"GUI update available: {status.CurrentVersion} -> {status.LatestVersion}";
-        selfUpdateButton.Enabled = !connector.IsRunning;
-        dismissSelfUpdateButton.Enabled = true;
-        selfUpdateBanner.Visible = true;
-        ApplyMinimumSize();
-    }
-
     private void HideSelfUpdateBanner()
     {
-        selfUpdateBanner.Visible = false;
+        state.HideSelfUpdate();
+        RenderState();
         ApplyMinimumSize();
-    }
-
-    private static bool IsSelfUpdateCheckDue(GuiConfiguration configuration)
-    {
-        if (configuration.SelfUpdateCheckInterval == SelfUpdateIntervals.Off)
-        {
-            return false;
-        }
-
-        if (configuration.LastSelfUpdateCheck is null)
-        {
-            return true;
-        }
-
-        var today = DateOnly.FromDateTime(DateTime.UtcNow);
-        var nextCheck = configuration.SelfUpdateCheckInterval switch
-        {
-            SelfUpdateIntervals.Weekly => configuration.LastSelfUpdateCheck.Value.AddDays(7),
-            SelfUpdateIntervals.Monthly => configuration.LastSelfUpdateCheck.Value.AddMonths(1),
-            _ => configuration.LastSelfUpdateCheck.Value.AddDays(1)
-        };
-
-        return today >= nextCheck;
     }
 }

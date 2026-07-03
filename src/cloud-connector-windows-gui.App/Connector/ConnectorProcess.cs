@@ -2,9 +2,9 @@ using System.Diagnostics;
 
 using CloudConnectorWindowsGui.Core;
 
-namespace CloudConnectorWindowsGui;
+namespace CloudConnectorWindowsGui.App;
 
-internal sealed class ConnectorProcess
+public sealed class ConnectorProcess
 {
     private Process? process;
 

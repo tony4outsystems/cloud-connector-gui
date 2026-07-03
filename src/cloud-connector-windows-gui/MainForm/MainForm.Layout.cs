@@ -1,3 +1,5 @@
+using CloudConnectorWindowsGui.App;
+
 namespace CloudConnectorWindowsGui;
 
 internal sealed partial class MainForm
@@ -250,18 +252,22 @@ internal sealed partial class MainForm
         endpointsGrid.Rows.Remove(row);
     }
 
-    private void SetRunningState(bool running)
+    private void RenderState()
     {
-        startButton.Enabled = !running;
-        stopButton.Enabled = running;
-        statusLabel.Text = running ? "Running" : "Stopped";
-        endpointsGrid.ReadOnly = running;
-        addressTextBox.ReadOnly = running;
-        tokenTextBox.ReadOnly = running;
-        proxyTextBox.ReadOnly = running;
-        selfUpdateCheckIntervalComboBox.Enabled = !running;
-        verboseCheckBox.Enabled = !running;
-        updateBinaryButton.Enabled = !running;
-        selfUpdateButton.Enabled = !running && availableSelfUpdate is not null;
+        startButton.Enabled = state.CanStart;
+        stopButton.Enabled = state.CanStop;
+        statusLabel.Text = state.StatusText;
+        binaryVersionLabel.Text = state.BinaryVersionText;
+        endpointsGrid.ReadOnly = !state.CanEditConfiguration;
+        addressTextBox.ReadOnly = !state.CanEditConfiguration;
+        tokenTextBox.ReadOnly = !state.CanEditConfiguration;
+        proxyTextBox.ReadOnly = !state.CanEditConfiguration;
+        selfUpdateCheckIntervalComboBox.Enabled = state.CanEditConfiguration;
+        verboseCheckBox.Enabled = state.CanEditConfiguration;
+        updateBinaryButton.Enabled = state.CanUpdateBinary;
+        selfUpdateButton.Enabled = state.CanApplySelfUpdate;
+        dismissSelfUpdateButton.Enabled = state.AvailableSelfUpdate is not null;
+        selfUpdateBannerLabel.Text = state.SelfUpdateBannerText;
+        selfUpdateBanner.Visible = state.IsSelfUpdateBannerVisible;
     }
 }

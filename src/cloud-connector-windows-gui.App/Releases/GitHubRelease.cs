@@ -1,8 +1,8 @@
 using System.Text.Json.Serialization;
 
-namespace CloudConnectorWindowsGui;
+namespace CloudConnectorWindowsGui.App;
 
-internal sealed record GitHubRelease(
+public sealed record GitHubRelease(
     [property: JsonPropertyName("tag_name")] string TagName,
     bool Draft,
     bool Prerelease,
@@ -10,7 +10,7 @@ internal sealed record GitHubRelease(
     [property: JsonPropertyName("published_at")] DateTimeOffset? PublishedAt,
     IReadOnlyList<GitHubReleaseAsset> Assets);
 
-internal sealed record GitHubReleaseAsset(
+public sealed record GitHubReleaseAsset(
     string Name,
     [property: JsonPropertyName("browser_download_url")] string BrowserDownloadUrl,
     string? Digest);

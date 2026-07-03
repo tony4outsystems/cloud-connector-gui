@@ -3,9 +3,9 @@ using System.IO.Compression;
 using System.Reflection;
 using System.Security.Cryptography;
 
-namespace CloudConnectorWindowsGui;
+namespace CloudConnectorWindowsGui.App;
 
-internal sealed class SelfUpdateManager
+public sealed class SelfUpdateManager
 {
     private const string RepositoryOwner = "tony4outsystems";
     private const string RepositoryName = "cloud-connector-windows-gui";
@@ -18,7 +18,7 @@ internal sealed class SelfUpdateManager
     {
     }
 
-    internal SelfUpdateManager(GitHubReleaseClient releaseClient)
+    public SelfUpdateManager(GitHubReleaseClient releaseClient)
     {
         this.releaseClient = releaseClient;
     }
@@ -51,7 +51,7 @@ internal sealed class SelfUpdateManager
         Directory.CreateDirectory(stagingDirectory);
         ZipFile.ExtractToDirectory(archivePath, stagingDirectory, overwriteFiles: true);
 
-        var executablePath = Environment.ProcessPath ?? Application.ExecutablePath;
+        var executablePath = Environment.ProcessPath ?? Path.Combine(AppContext.BaseDirectory, "cloud-connector-windows-gui.exe");
         var installDirectory = AppContext.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
         var scriptPath = Path.Combine(Path.GetTempPath(), $"cloud-connector-windows-gui-update-{Guid.NewGuid():N}.ps1");
         File.WriteAllText(scriptPath, CreateUpdateScript(Environment.ProcessId, stagingDirectory, installDirectory, executablePath, archivePath));
@@ -65,7 +65,7 @@ internal sealed class SelfUpdateManager
             CreateNoWindow = true
         });
 
-        Application.Exit();
+        Environment.Exit(0);
     }
 
     private static GitHubReleaseAsset SelectReleaseAsset(GitHubRelease release)
@@ -93,8 +93,9 @@ internal sealed class SelfUpdateManager
 
     private static string GetCurrentVersion()
     {
-        var version = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
-            ?? Assembly.GetExecutingAssembly().GetName().Version?.ToString()
+        var assembly = Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly();
+        var version = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
+            ?? assembly.GetName().Version?.ToString()
             ?? "0.0.0";
         var metadataIndex = version.IndexOf('+', StringComparison.Ordinal);
         return metadataIndex >= 0 ? version[..metadataIndex] : version;

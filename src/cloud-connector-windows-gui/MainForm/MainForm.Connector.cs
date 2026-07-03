@@ -1,3 +1,4 @@
+using CloudConnectorWindowsGui.App;
 using CloudConnectorWindowsGui.Core;
 
 namespace CloudConnectorWindowsGui;
@@ -6,8 +7,8 @@ internal sealed partial class MainForm
 {
     private void StartConnector()
     {
-        var options = ReadOptions();
-        var validationErrors = ConnectorValidator.Validate(options);
+        CaptureStateFromControls();
+        var validationErrors = controller.ValidateLaunchOptions(state);
         if (validationErrors.Count > 0)
         {
             MessageBox.Show(string.Join(Environment.NewLine, validationErrors), "Cannot start connector", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -16,23 +17,22 @@ internal sealed partial class MainForm
 
         try
         {
-            SaveConfiguration(options);
-
-            if (!File.Exists(binaryManager.ExecutablePath))
+            if (!File.Exists(controller.ConnectorExecutablePath))
             {
                 MessageBox.Show("The connector binary is not installed yet. Use Download / Update Binary first.", "Cannot start connector", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             logTextBox.Clear();
-            AppendLog(ConnectorArguments.ToDisplayCommand("outsystemscc.exe", options));
-            connector.Start(binaryManager.ExecutablePath, options);
-            SetRunningState(true);
+            AppendLog(controller.GetDisplayCommand(state));
+            controller.StartConnector(state);
+            RenderState();
         }
         catch (Exception ex) when (ex is IOException or InvalidOperationException or ArgumentException)
         {
             MessageBox.Show(ex.Message, "Cannot start connector", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            SetRunningState(false);
+            state.SetRunning(false);
+            RenderState();
         }
     }
 
@@ -40,13 +40,13 @@ internal sealed partial class MainForm
     {
         stopButton.Enabled = false;
         AppendLog("Stopping outsystemscc...");
-        await connector.StopAsync().ConfigureAwait(true);
-        SetRunningState(false);
+        await controller.StopConnectorAsync(state).ConfigureAwait(true);
+        RenderState();
     }
 
     private async Task InstallOrUpdateBinaryAsync(bool force)
     {
-        if (connector.IsRunning)
+        if (controller.IsConnectorRunning)
         {
             MessageBox.Show("Stop the connector before updating the binary.", "Connector is running", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return;
@@ -64,8 +64,8 @@ internal sealed partial class MainForm
             });
 
             var result = force
-                ? await binaryManager.InstallLatestAsync(progress).ConfigureAwait(true)
-                : await binaryManager.EnsureInstalledAsync(progress).ConfigureAwait(true);
+                ? await controller.InstallOrUpdateBinaryAsync(force: true, progress).ConfigureAwait(true)
+                : await controller.InstallOrUpdateBinaryAsync(force: false, progress).ConfigureAwait(true);
 
             if (result.Installed)
             {
@@ -85,7 +85,8 @@ internal sealed partial class MainForm
         finally
         {
             statusLabel.Text = previousStatus;
-            SetRunningState(connector.IsRunning);
+            state.SetRunning(controller.IsConnectorRunning);
+            RenderState();
         }
     }
 
@@ -94,21 +95,18 @@ internal sealed partial class MainForm
         updateBinaryButton.Enabled = false;
         try
         {
-            var status = await binaryManager.GetVersionStatusAsync().ConfigureAwait(true);
-            var current = status.CurrentVersion ?? "not installed";
-            var latest = status.LatestVersion;
-            var suffix = status.IsLatest ? "up to date" : "update available";
-            binaryVersionLabel.Text = $"current {current} / latest {latest} ({suffix})";
+            await controller.RefreshBinaryVersionAsync(state).ConfigureAwait(true);
+            RenderState();
         }
         catch (Exception ex) when (ex is HttpRequestException or IOException or InvalidOperationException)
         {
-            var current = binaryManager.InstalledVersion ?? "not installed";
-            binaryVersionLabel.Text = $"current {current} / latest unavailable";
+            controller.SetBinaryVersionUnavailable(state);
+            RenderState();
             AppendLog($"Version check failed: {ex.Message}");
         }
         finally
         {
-            updateBinaryButton.Enabled = !connector.IsRunning;
+            updateBinaryButton.Enabled = !controller.IsConnectorRunning;
         }
     }
 }
