@@ -1,5 +1,5 @@
-using System.Text;
 using System.Globalization;
+using System.Text;
 using CloudConnectorWindowsGui.Core;
 
 namespace CloudConnectorWindowsGui;
@@ -32,7 +32,7 @@ internal sealed class GuiConfigurationStore
         var token = string.Empty;
         var proxy = string.Empty;
         var verbose = false;
-        var selfUpdateCheckInterval = "daily";
+        var selfUpdateCheckInterval = SelfUpdateIntervals.Daily;
         DateOnly? lastSelfUpdateCheck = null;
         var endpoints = new List<Endpoint>();
         EndpointDraft? currentEndpoint = null;
@@ -82,7 +82,7 @@ internal sealed class GuiConfigurationStore
                     verbose = bool.TryParse(value, out var parsed) && parsed;
                     break;
                 case "self_update_check_interval":
-                    selfUpdateCheckInterval = NormalizeCheckInterval(ParseString(value));
+                    selfUpdateCheckInterval = SelfUpdateIntervals.Normalize(ParseString(value));
                     break;
                 case "last_self_update_check":
                     lastSelfUpdateCheck = ParseDate(value);
@@ -118,7 +118,7 @@ internal sealed class GuiConfigurationStore
         builder.Append("proxy = \"").Append(Escape(configuration.Proxy)).AppendLine("\"");
         builder.Append("verbose = ").AppendLine(configuration.Verbose.ToString().ToLowerInvariant());
         builder.Append("self_update_check_interval = \"")
-            .Append(Escape(NormalizeCheckInterval(configuration.SelfUpdateCheckInterval)))
+            .Append(Escape(SelfUpdateIntervals.Normalize(configuration.SelfUpdateCheckInterval)))
             .AppendLine("\"");
         if (configuration.LastSelfUpdateCheck is not null)
         {
@@ -224,17 +224,6 @@ internal sealed class GuiConfigurationStore
         return DateOnly.TryParseExact(trimmed, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsed)
             ? parsed
             : null;
-    }
-
-    private static string NormalizeCheckInterval(string value)
-    {
-        return value.Trim().ToLowerInvariant() switch
-        {
-            "off" => "off",
-            "weekly" => "weekly",
-            "monthly" => "monthly",
-            _ => "daily"
-        };
     }
 
     private static string StripComment(string line)

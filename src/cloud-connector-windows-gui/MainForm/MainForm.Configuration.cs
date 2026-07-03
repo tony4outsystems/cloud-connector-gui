@@ -35,7 +35,7 @@ internal sealed partial class MainForm
         selfUpdateCheckIntervalComboBox.SelectedItem = configuration.SelfUpdateCheckInterval;
         if (selfUpdateCheckIntervalComboBox.SelectedItem is null)
         {
-            selfUpdateCheckIntervalComboBox.SelectedItem = "daily";
+            selfUpdateCheckIntervalComboBox.SelectedItem = SelfUpdateIntervals.Daily;
         }
 
         lastSelfUpdateCheck = configuration.LastSelfUpdateCheck;
@@ -68,7 +68,7 @@ internal sealed partial class MainForm
     {
         return GuiConfiguration.FromLaunchOptions(options, new GuiConfiguration
         {
-            SelfUpdateCheckInterval = Convert.ToString(selfUpdateCheckIntervalComboBox.SelectedItem) ?? "daily",
+            SelfUpdateCheckInterval = Convert.ToString(selfUpdateCheckIntervalComboBox.SelectedItem) ?? SelfUpdateIntervals.Daily,
             LastSelfUpdateCheck = lastSelfUpdateCheck
         });
     }

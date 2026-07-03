@@ -58,8 +58,8 @@ internal sealed partial class MainForm
         proxyTextBox.PlaceholderText = "Optional HTTP CONNECT or SOCKS5 proxy";
         addressTextBox.PlaceholderText = "https://organization.outsystems.app/sg_...";
         selfUpdateCheckIntervalComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
-        selfUpdateCheckIntervalComboBox.Items.AddRange(["daily", "weekly", "monthly", "off"]);
-        selfUpdateCheckIntervalComboBox.SelectedItem = "daily";
+        selfUpdateCheckIntervalComboBox.Items.AddRange(SelfUpdateIntervals.All);
+        selfUpdateCheckIntervalComboBox.SelectedItem = SelfUpdateIntervals.Daily;
 
         verboseCheckBox.Text = "Verbose logs";
         verboseCheckBox.AutoSize = true;

@@ -124,9 +124,3 @@ Remove-Item -Path $MyInvocation.MyCommand.Path -Force -ErrorAction SilentlyConti
         return value.Replace("'", "''", StringComparison.Ordinal);
     }
 }
-
-internal sealed record SelfUpdateStatus(
-    string CurrentVersion,
-    string LatestVersion,
-    bool IsUpdateAvailable,
-    GitHubReleaseAsset? Asset);

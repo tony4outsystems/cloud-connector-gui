@@ -187,7 +187,3 @@ internal sealed class CloudConnectorBinaryManager
         }
     }
 }
-
-internal sealed record BinaryVersionStatus(string? CurrentVersion, string LatestVersion, bool IsLatest);
-
-internal sealed record InstallResult(string? Version, bool Installed);

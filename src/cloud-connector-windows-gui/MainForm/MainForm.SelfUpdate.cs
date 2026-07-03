@@ -82,7 +82,7 @@ internal sealed partial class MainForm
 
     private static bool IsSelfUpdateCheckDue(GuiConfiguration configuration)
     {
-        if (configuration.SelfUpdateCheckInterval == "off")
+        if (configuration.SelfUpdateCheckInterval == SelfUpdateIntervals.Off)
         {
             return false;
         }
@@ -95,8 +95,8 @@ internal sealed partial class MainForm
         var today = DateOnly.FromDateTime(DateTime.UtcNow);
         var nextCheck = configuration.SelfUpdateCheckInterval switch
         {
-            "weekly" => configuration.LastSelfUpdateCheck.Value.AddDays(7),
-            "monthly" => configuration.LastSelfUpdateCheck.Value.AddMonths(1),
+            SelfUpdateIntervals.Weekly => configuration.LastSelfUpdateCheck.Value.AddDays(7),
+            SelfUpdateIntervals.Monthly => configuration.LastSelfUpdateCheck.Value.AddMonths(1),
             _ => configuration.LastSelfUpdateCheck.Value.AddDays(1)
         };
 

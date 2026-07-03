@@ -12,7 +12,7 @@ internal sealed class GuiConfiguration
 
     public bool Verbose { get; init; }
 
-    public string SelfUpdateCheckInterval { get; init; } = "daily";
+    public string SelfUpdateCheckInterval { get; init; } = SelfUpdateIntervals.Daily;
 
     public DateOnly? LastSelfUpdateCheck { get; init; }
 
@@ -36,7 +36,7 @@ internal sealed class GuiConfiguration
             Token = options.Token,
             Proxy = options.Proxy ?? string.Empty,
             Verbose = options.Verbose,
-            SelfUpdateCheckInterval = current?.SelfUpdateCheckInterval ?? "daily",
+            SelfUpdateCheckInterval = current?.SelfUpdateCheckInterval ?? SelfUpdateIntervals.Daily,
             LastSelfUpdateCheck = current?.LastSelfUpdateCheck,
             Endpoints = options.Endpoints
         };
