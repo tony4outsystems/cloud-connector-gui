@@ -3,6 +3,9 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using CloudConnectorWindowsGui.ViewModels;
 using CloudConnectorWindowsGui.Views;
+#if DEBUG
+using AvaloniaUI.DiagnosticsSupport;
+#endif
 
 namespace CloudConnectorWindowsGui;
 
@@ -11,6 +14,9 @@ public sealed class GuiApplication : Application
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
+#if DEBUG
+        this.AttachDeveloperTools();
+#endif
     }
 
     public override void OnFrameworkInitializationCompleted()
