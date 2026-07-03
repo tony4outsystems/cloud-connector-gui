@@ -8,8 +8,8 @@
         Width="1000" Height="840"
         MinWidth="920" MinHeight="800"
         WindowStartupLocation="CenterScreen">
-    <Grid Margin="16" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,*">
-        <Menu Grid.Row="0" Margin="0,0,0,8" IsVisible="{Binding !IsMacOS}">
+    <Grid Margin="20" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,*" RowSpacing="14">
+        <Menu Grid.Row="0" Margin="-8,-8,0,-6" IsVisible="{Binding !IsMacOS}">
             <MenuItem Header="_File">
                 <MenuItem Header="_Configuration..." Command="{Binding OpenConfigurationCommand}" />
             </MenuItem>
@@ -18,74 +18,91 @@
             </MenuItem>
         </Menu>
 
-        <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Margin="0,0,0,12">
-            <TextBlock Grid.Column="0" Text="OutSystems Cloud Connector" FontWeight="Bold" VerticalAlignment="Center" />
-            <Button Grid.Column="1" Content="Configuration" Command="{Binding OpenConfigurationCommand}" IsVisible="{Binding !IsMacOS}" />
+        <Grid Grid.Row="1" ColumnDefinitions="Auto,*,Auto">
+            <Image Grid.Column="0" Source="/Assets/outsystems.ico" Width="28" Height="28" Margin="0,0,10,0" />
+            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                <TextBlock Classes="h1" Text="OutSystems Cloud Connector" />
+                <TextBlock Classes="subtle" Text="Manage local tunnel endpoints for your OutSystems environment" />
+            </StackPanel>
+            <Button Grid.Column="2" Classes="subtle" Content="Configuration" Command="{Binding OpenConfigurationCommand}" IsVisible="{Binding !IsMacOS}" VerticalAlignment="Center" />
         </Grid>
 
         <Border Grid.Row="2"
-                Background="#FFF8D2"
-                Padding="12"
-                Margin="0,0,0,12"
+                Classes="banner"
+                Padding="14"
                 IsVisible="{Binding IsSelfUpdateBannerVisible}">
             <Grid ColumnDefinitions="*,Auto,Auto">
                 <TextBlock Grid.Column="0" Text="{Binding SelfUpdateBannerText}" VerticalAlignment="Center" Margin="0,0,12,0" />
-                <Button Grid.Column="1" Content="Update and Restart" Command="{Binding ApplySelfUpdateCommand}" IsEnabled="{Binding CanApplySelfUpdate}" Margin="0,0,8,0" />
-                <Button Grid.Column="2" Content="Dismiss" Command="{Binding HideSelfUpdateBannerCommand}" />
+                <Button Grid.Column="1" Classes="primary" Content="Update and Restart" Command="{Binding ApplySelfUpdateCommand}" IsEnabled="{Binding CanApplySelfUpdate}" Margin="0,0,8,0" />
+                <Button Grid.Column="2" Classes="subtle" Content="Dismiss" Command="{Binding HideSelfUpdateBannerCommand}" />
             </Grid>
         </Border>
 
-        <Grid Grid.Row="3" ColumnDefinitions="110,*" RowDefinitions="Auto,Auto,Auto,Auto">
-            <TextBlock Grid.Row="0" Grid.Column="0" Text="Address" VerticalAlignment="Center" Margin="0,4,8,4" />
-            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Address}" PlaceholderText="https://organization.outsystems.app/sg_..." IsEnabled="{Binding CanEditConfiguration}" Margin="0,4" />
+        <Border Grid.Row="3" Classes="card">
+            <StackPanel Spacing="10">
+                <TextBlock Classes="h2" Text="CONNECTION" />
+                <Grid ColumnDefinitions="110,*" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="8">
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Address" VerticalAlignment="Center" Margin="0,0,8,0" />
+                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Address}" PlaceholderText="https://organization.outsystems.app/sg_..." IsEnabled="{Binding CanEditConfiguration}" />
 
-            <TextBlock Grid.Row="1" Grid.Column="0" Text="Token" VerticalAlignment="Center" Margin="0,4,8,4" />
-            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Token}" PasswordChar="*" IsEnabled="{Binding CanEditConfiguration}" Margin="0,4" />
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Token" VerticalAlignment="Center" Margin="0,0,8,0" />
+                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Token}" PasswordChar="*" IsEnabled="{Binding CanEditConfiguration}" />
 
-            <TextBlock Grid.Row="2" Grid.Column="0" Text="Proxy" VerticalAlignment="Center" Margin="0,4,8,4" />
-            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Proxy}" PlaceholderText="Optional HTTP CONNECT or SOCKS5 proxy" IsEnabled="{Binding CanEditConfiguration}" Margin="0,4" />
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Proxy" VerticalAlignment="Center" Margin="0,0,8,0" />
+                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Proxy}" PlaceholderText="Optional HTTP CONNECT or SOCKS5 proxy" IsEnabled="{Binding CanEditConfiguration}" />
 
-            <CheckBox Grid.Row="3" Grid.Column="1" Content="Verbose logs" IsChecked="{Binding Verbose}" IsEnabled="{Binding CanEditConfiguration}" Margin="0,8,0,10" />
+                    <CheckBox Grid.Row="3" Grid.Column="1" Content="Verbose logs" IsChecked="{Binding Verbose}" IsEnabled="{Binding CanEditConfiguration}" />
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Row="4" Classes="card" Padding="16" MinHeight="220">
+            <Grid RowDefinitions="Auto,*,Auto" RowSpacing="10">
+                <TextBlock Grid.Row="0" Classes="h2" Text="ENDPOINTS" />
+                <DataGrid Grid.Row="1"
+                          ItemsSource="{Binding Endpoints}"
+                          IsReadOnly="False"
+                          CanUserResizeColumns="True"
+                          AutoGenerateColumns="False"
+                          GridLinesVisibility="Horizontal">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Local port" Binding="{Binding LocalPort}" Width="190" />
+                        <DataGridTextColumn Header="Remote host" Binding="{Binding RemoteHost}" Width="*" />
+                        <DataGridTextColumn Header="Remote port" Binding="{Binding RemotePort}" Width="130" />
+                        <DataGridTemplateColumn Header="" Width="90">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="vm:EndpointRowViewModel">
+                                    <Button Content="Remove"
+                                            Classes="subtle"
+                                            x:CompileBindings="False"
+                                            Command="{Binding $parent[Window].DataContext.RemoveEndpointCommand}"
+                                            CommandParameter="{Binding}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+                <Button Grid.Row="2" Classes="subtle" Content="Add endpoint" Command="{Binding AddEndpointCommand}" IsEnabled="{Binding CanEditConfiguration}" HorizontalAlignment="Left" />
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="5" ColumnDefinitions="Auto,Auto,*">
+            <Button Grid.Column="0" Classes="primary" Content="Start" Command="{Binding StartConnectorCommand}" IsEnabled="{Binding CanStart}" MinWidth="100" Margin="0,0,8,0" />
+            <Button Grid.Column="1" Classes="subtle" Content="Stop" Command="{Binding StopConnectorCommand}" IsEnabled="{Binding CanStop}" MinWidth="100" Margin="0,0,8,0" />
+            <TextBlock Grid.Column="2" Text="{Binding StatusText}" VerticalAlignment="Center" Margin="8,0,0,0" />
         </Grid>
 
-        <Grid Grid.Row="4" RowDefinitions="*,Auto" MinHeight="220">
-            <DataGrid Grid.Row="0"
-                      ItemsSource="{Binding Endpoints}"
-                      IsReadOnly="False"
-                      CanUserResizeColumns="True"
-                      AutoGenerateColumns="False"
-                      GridLinesVisibility="All">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Local port" Binding="{Binding LocalPort}" Width="190" />
-                    <DataGridTextColumn Header="Remote host" Binding="{Binding RemoteHost}" Width="*" />
-                    <DataGridTextColumn Header="Remote port" Binding="{Binding RemotePort}" Width="130" />
-                    <DataGridTemplateColumn Header="" Width="90">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate x:DataType="vm:EndpointRowViewModel">
-                                <Button Content="Remove"
-                                        x:CompileBindings="False"
-                                        Command="{Binding $parent[Window].DataContext.RemoveEndpointCommand}"
-                                        CommandParameter="{Binding}" />
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                </DataGrid.Columns>
-            </DataGrid>
-            <Button Grid.Row="1" Content="Add endpoint" Command="{Binding AddEndpointCommand}" IsEnabled="{Binding CanEditConfiguration}" Margin="0,8,0,0" HorizontalAlignment="Left" />
-        </Grid>
-
-        <Grid Grid.Row="5" ColumnDefinitions="Auto,Auto,*" Margin="0,12,0,12">
-            <Button Grid.Column="0" Content="Start" Command="{Binding StartConnectorCommand}" IsEnabled="{Binding CanStart}" MinWidth="100" Margin="0,0,6,0" />
-            <Button Grid.Column="1" Content="Stop" Command="{Binding StopConnectorCommand}" IsEnabled="{Binding CanStop}" MinWidth="100" Margin="0,0,6,0" />
-            <TextBlock Grid.Column="2" Text="{Binding StatusText}" VerticalAlignment="Center" Margin="16,0,0,0" />
-        </Grid>
-
-        <TextBox Grid.Row="6"
-                 Text="{Binding LogText}"
-                 IsReadOnly="True"
-                 AcceptsReturn="True"
-                 TextWrapping="NoWrap"
-                 FontFamily="monospace"
-                 MinHeight="240" />
+        <Border Grid.Row="6" Classes="card" Padding="16">
+            <Grid RowDefinitions="Auto,*" RowSpacing="10">
+                <TextBlock Grid.Row="0" Classes="h2" Text="LOGS" />
+                <TextBox Grid.Row="1"
+                         Classes="console"
+                         Text="{Binding LogText}"
+                         IsReadOnly="True"
+                         AcceptsReturn="True"
+                         TextWrapping="NoWrap"
+                         MinHeight="200" />
+            </Grid>
+        </Border>
     </Grid>
 </Window>

@@ -1,0 +1,127 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <Styles.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Light">
+          <Color x:Key="AccentColor">#FA114F</Color>
+          <Color x:Key="AccentColorLight">#FF4472</Color>
+          <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}" />
+          <SolidColorBrush x:Key="AccentBrushLight" Color="{StaticResource AccentColorLight}" />
+          <SolidColorBrush x:Key="WindowBackgroundBrush" Color="#F2F3F5" />
+          <SolidColorBrush x:Key="SurfaceBrush" Color="#FFFFFF" />
+          <SolidColorBrush x:Key="SurfaceAltBrush" Color="#F6F7F9" />
+          <SolidColorBrush x:Key="BorderBrush1" Color="#E3E5E8" />
+          <SolidColorBrush x:Key="TextSecondaryBrush" Color="#6B7280" />
+          <SolidColorBrush x:Key="InfoBannerBrush" Color="#FFF4E5" />
+          <SolidColorBrush x:Key="InfoBannerBorderBrush" Color="#F4C978" />
+          <SolidColorBrush x:Key="SuccessBrush" Color="#1E9E5A" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Dark">
+          <Color x:Key="AccentColor">#FF4472</Color>
+          <Color x:Key="AccentColorLight">#FF6B90</Color>
+          <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}" />
+          <SolidColorBrush x:Key="AccentBrushLight" Color="{StaticResource AccentColorLight}" />
+          <SolidColorBrush x:Key="WindowBackgroundBrush" Color="#16171B" />
+          <SolidColorBrush x:Key="SurfaceBrush" Color="#1E1F24" />
+          <SolidColorBrush x:Key="SurfaceAltBrush" Color="#26272E" />
+          <SolidColorBrush x:Key="BorderBrush1" Color="#34363E" />
+          <SolidColorBrush x:Key="TextSecondaryBrush" Color="#9CA3AF" />
+          <SolidColorBrush x:Key="InfoBannerBrush" Color="#3A2E1A" />
+          <SolidColorBrush x:Key="InfoBannerBorderBrush" Color="#8A6A2E" />
+          <SolidColorBrush x:Key="SuccessBrush" Color="#3DD68C" />
+        </ResourceDictionary>
+      </ResourceDictionary.ThemeDictionaries>
+    </ResourceDictionary>
+  </Styles.Resources>
+
+  <Style Selector="Window">
+    <Setter Property="Background" Value="{DynamicResource WindowBackgroundBrush}" />
+  </Style>
+
+  <!-- Typography -->
+  <Style Selector="TextBlock.h1">
+    <Setter Property="FontSize" Value="20" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+  <Style Selector="TextBlock.h2">
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+  </Style>
+  <Style Selector="TextBlock.subtle">
+    <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+    <Setter Property="FontSize" Value="12" />
+  </Style>
+
+  <!-- Cards / grouping surfaces -->
+  <Style Selector="Border.card">
+    <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush1}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="10" />
+    <Setter Property="Padding" Value="16" />
+  </Style>
+
+  <Style Selector="Border.banner">
+    <Setter Property="Background" Value="{DynamicResource InfoBannerBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource InfoBannerBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="8" />
+  </Style>
+
+  <!-- Buttons -->
+  <Style Selector="Button">
+    <Setter Property="CornerRadius" Value="6" />
+    <Setter Property="Padding" Value="14,7" />
+  </Style>
+
+  <Style Selector="Button.primary">
+    <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+    <Setter Property="Foreground" Value="White" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+  <Style Selector="Button.primary:pointerover">
+    <Setter Property="Opacity" Value="0.9" />
+  </Style>
+  <Style Selector="Button.primary:pressed">
+    <Setter Property="Opacity" Value="0.8" />
+  </Style>
+  <Style Selector="Button.primary:disabled">
+    <Setter Property="Opacity" Value="0.5" />
+  </Style>
+
+  <Style Selector="Button.subtle">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush1}" />
+    <Setter Property="BorderThickness" Value="1" />
+  </Style>
+
+  <!-- Inputs -->
+  <Style Selector="TextBox">
+    <Setter Property="CornerRadius" Value="6" />
+  </Style>
+  <Style Selector="ComboBox">
+    <Setter Property="CornerRadius" Value="6" />
+  </Style>
+
+  <!-- Data grid -->
+  <Style Selector="DataGrid">
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush1}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+  </Style>
+
+  <!-- Console-style log output -->
+  <Style Selector="TextBox.console">
+    <Setter Property="Background" Value="{DynamicResource SurfaceAltBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush1}" />
+    <Setter Property="CornerRadius" Value="6" />
+    <Setter Property="Padding" Value="12" />
+    <Setter Property="FontFamily" Value="Cascadia Code, Consolas, monospace" />
+    <Setter Property="FontSize" Value="12" />
+  </Style>
+</Styles>

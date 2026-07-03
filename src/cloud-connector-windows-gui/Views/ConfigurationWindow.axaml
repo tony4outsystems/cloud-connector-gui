@@ -9,17 +9,23 @@
         CanResize="False"
         WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False">
-    <Grid Margin="20" RowDefinitions="Auto,Auto,Auto">
-        <Grid Grid.Row="0" ColumnDefinitions="150,*" Margin="0,0,0,16">
-            <TextBlock Grid.Column="0" Text="GUI update check" VerticalAlignment="Center" Margin="0,4,8,4" />
-            <ComboBox Grid.Column="1" ItemsSource="{Binding SelfUpdateIntervalOptions}" SelectedItem="{Binding SelfUpdateCheckInterval}" IsEnabled="{Binding CanEditConfiguration}" Margin="0,4" />
-        </Grid>
+    <Grid Margin="24" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="16">
+        <TextBlock Grid.Row="0" Classes="h1" Text="Configuration" />
 
-        <Grid Grid.Row="1" ColumnDefinitions="Auto,*" Margin="0,0,0,16">
-            <Button Grid.Column="0" Content="Download / Update Binary" Command="{Binding InstallOrUpdateBinaryCommand}" IsEnabled="{Binding CanUpdateBinary}" MinWidth="190" />
-            <TextBlock Grid.Column="1" Text="{Binding BinaryVersionText}" VerticalAlignment="Center" Margin="12,0,0,0" TextWrapping="Wrap" />
-        </Grid>
+        <Border Grid.Row="1" Classes="card">
+            <StackPanel Spacing="12">
+                <Grid ColumnDefinitions="150,*">
+                    <TextBlock Grid.Column="0" Text="GUI update check" VerticalAlignment="Center" Margin="0,0,8,0" />
+                    <ComboBox Grid.Column="1" ItemsSource="{Binding SelfUpdateIntervalOptions}" SelectedItem="{Binding SelfUpdateCheckInterval}" IsEnabled="{Binding CanEditConfiguration}" />
+                </Grid>
 
-        <Button Grid.Row="2" Content="Close" HorizontalAlignment="Right" MinWidth="80" IsDefault="True" IsCancel="True" Click="Close_OnClick" />
+                <Grid ColumnDefinitions="Auto,*">
+                    <Button Grid.Column="0" Classes="subtle" Content="Download / Update Binary" Command="{Binding InstallOrUpdateBinaryCommand}" IsEnabled="{Binding CanUpdateBinary}" MinWidth="190" />
+                    <TextBlock Grid.Column="1" Classes="subtle" Text="{Binding BinaryVersionText}" VerticalAlignment="Center" Margin="12,0,0,0" TextWrapping="Wrap" />
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <Button Grid.Row="3" Classes="primary" Content="Close" HorizontalAlignment="Right" MinWidth="80" IsDefault="True" IsCancel="True" Click="Close_OnClick" />
     </Grid>
 </Window>
