@@ -4,9 +4,7 @@ using CloudConnectorWindowsGui.App;
 using CloudConnectorWindowsGui.Core;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using MessageBox.Avalonia.Enums;
-using MsBox.Avalonia;
-using MsBox.Avalonia.Enums;
+using CloudConnectorWindowsGui.Views;
 
 namespace CloudConnectorWindowsGui.ViewModels;
 
@@ -165,7 +163,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         var validationErrors = controller.ValidateLaunchOptions(state);
         if (validationErrors.Count > 0)
         {
-            await ShowMessageAsync(string.Join(Environment.NewLine, validationErrors), "Cannot start connector", Icon.Warning).ConfigureAwait(true);
+            await ShowMessageAsync(string.Join(Environment.NewLine, validationErrors), "Cannot start connector").ConfigureAwait(true);
             return;
         }
 
@@ -173,7 +171,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         {
             if (!File.Exists(controller.ConnectorExecutablePath))
             {
-                await ShowMessageAsync("The connector binary is not installed yet. Use Download / Update Binary first.", "Cannot start connector", Icon.Warning).ConfigureAwait(true);
+                await ShowMessageAsync("The connector binary is not installed yet. Use Download / Update Binary first.", "Cannot start connector").ConfigureAwait(true);
                 return;
             }
 
@@ -184,7 +182,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         }
         catch (Exception ex) when (ex is IOException or InvalidOperationException or ArgumentException)
         {
-            await ShowMessageAsync(ex.Message, "Cannot start connector", Icon.Error).ConfigureAwait(true);
+            await ShowMessageAsync(ex.Message, "Cannot start connector").ConfigureAwait(true);
             state.SetRunning(false);
             RenderState();
         }
@@ -204,7 +202,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
     {
         if (controller.IsConnectorRunning)
         {
-            await ShowMessageAsync("Stop the connector before updating the binary.", "Connector is running", Icon.Warning).ConfigureAwait(true);
+            await ShowMessageAsync("Stop the connector before updating the binary.", "Connector is running").ConfigureAwait(true);
             return;
         }
 
@@ -231,7 +229,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         catch (Exception ex) when (ex is HttpRequestException or IOException or InvalidOperationException or UnauthorizedAccessException)
         {
             AppendLog($"Binary install failed: {ex.Message}");
-            await ShowMessageAsync(ex.Message, "Cannot install connector binary", Icon.Error).ConfigureAwait(true);
+            await ShowMessageAsync(ex.Message, "Cannot install connector binary").ConfigureAwait(true);
         }
         finally
         {
@@ -285,7 +283,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
         if (controller.IsConnectorRunning)
         {
-            await ShowMessageAsync("Stop the connector before updating the GUI.", "Connector is running", Icon.Warning).ConfigureAwait(true);
+            await ShowMessageAsync("Stop the connector before updating the GUI.", "Connector is running").ConfigureAwait(true);
             return;
         }
 
@@ -304,7 +302,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         catch (Exception ex) when (ex is HttpRequestException or IOException or InvalidOperationException or UnauthorizedAccessException)
         {
             AppendLog($"GUI update failed: {ex.Message}");
-            await ShowMessageAsync(ex.Message, "Cannot update GUI", Icon.Error).ConfigureAwait(true);
+            await ShowMessageAsync(ex.Message, "Cannot update GUI").ConfigureAwait(true);
             StatusText = previousStatus;
             RenderState();
         }
@@ -366,16 +364,8 @@ public sealed partial class MainWindowViewModel : ObservableObject
         }
     }
 
-    private async Task ShowMessageAsync(string message, string title, Icon icon)
+    private async Task ShowMessageAsync(string message, string title)
     {
-        var box = MessageBoxManager.GetMessageBoxStandard(title, message, ButtonEnum.Ok, icon);
-        if (OwnerWindow is not null)
-        {
-            await box.ShowWindowDialogAsync(OwnerWindow).ConfigureAwait(true);
-        }
-        else
-        {
-            await box.ShowAsync().ConfigureAwait(true);
-        }
+        await MessageDialogWindow.ShowAsync(OwnerWindow, title, message).ConfigureAwait(true);
     }
 }
