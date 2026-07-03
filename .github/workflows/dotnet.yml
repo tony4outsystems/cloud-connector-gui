@@ -15,7 +15,7 @@ permissions:
   contents: write
 
 jobs:
-  build:
+  test:
     name: Build and Test
     runs-on: windows-latest
 
@@ -37,35 +37,69 @@ jobs:
       - name: Test
         run: dotnet test tests/cloud-connector-gui.Core.Tests/cloud-connector-gui.Core.Tests.csproj --configuration Release --no-restore
 
-      - name: Publish Windows x64 GUI
+  publish:
+    name: Publish ${{ matrix.rid }}
+    needs: test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - rid: win-x64
+            os: windows-latest
+          - rid: osx-x64
+            os: macos-latest
+          - rid: osx-arm64
+            os: macos-latest
+          - rid: linux-x64
+            os: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Publish GUI
         run: >
           dotnet publish src/cloud-connector-gui/cloud-connector-gui.csproj
           --configuration Release
-          --runtime win-x64
+          --runtime ${{ matrix.rid }}
           --self-contained true
-          --output artifacts/win-x64
+          --output artifacts/${{ matrix.rid }}
 
-      - name: Package artifact
+      - name: Package artifact (Windows)
+        if: runner.os == 'Windows'
         shell: pwsh
-        run: Compress-Archive -Path artifacts/win-x64/* -DestinationPath artifacts/cloud-connector-gui-win-x64.zip
+        run: Compress-Archive -Path artifacts/${{ matrix.rid }}/* -DestinationPath artifacts/cloud-connector-gui-${{ matrix.rid }}.zip
+
+      - name: Package artifact (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          chmod +x artifacts/${{ matrix.rid }}/cloud-connector-gui
+          tar -czf artifacts/cloud-connector-gui-${{ matrix.rid }}.tar.gz -C artifacts/${{ matrix.rid }} .
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: cloud-connector-gui-win-x64
-          path: artifacts/cloud-connector-gui-win-x64.zip
-          if-no-files-found: error
+          name: cloud-connector-gui-${{ matrix.rid }}
+          path: |
+            artifacts/cloud-connector-gui-${{ matrix.rid }}.zip
+            artifacts/cloud-connector-gui-${{ matrix.rid }}.tar.gz
+          if-no-files-found: ignore
 
       - name: Upload GitHub release asset
         if: startsWith(github.ref, 'refs/tags/v')
-        shell: pwsh
+        shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          $tag = $env:GITHUB_REF_NAME
-          $asset = "artifacts/cloud-connector-gui-win-x64.zip"
-          if (gh release view $tag 2>$null) {
-            gh release upload $tag $asset --clobber
-          } else {
-            gh release create $tag $asset --title $tag --notes "Windows GUI launcher release."
-          }
+          tag="${GITHUB_REF_NAME}"
+          asset=$(ls artifacts/cloud-connector-gui-${{ matrix.rid }}.* )
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release upload "$tag" "$asset" --clobber
+          else
+            gh release create "$tag" "$asset" --title "$tag" --notes "cloud-connector-gui release."
+          fi

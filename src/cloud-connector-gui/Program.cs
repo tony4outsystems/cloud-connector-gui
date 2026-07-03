@@ -13,7 +13,7 @@ internal static class Program
         using var singleInstanceMutex = new Mutex(true, SingleInstanceMutexName, out var createdNew);
         if (!createdNew)
         {
-            MessageBoxW(IntPtr.Zero, "Cloud Connector GUI is already running.", "Already running", MB_OK | MB_ICONINFORMATION);
+            ShowAlreadyRunningNotice();
             return;
         }
 
@@ -26,6 +26,18 @@ internal static class Program
             .UsePlatformDetect()
             .WithInterFont()
             .LogToTrace();
+    }
+
+    private static void ShowAlreadyRunningNotice()
+    {
+        const string message = "Cloud Connector GUI is already running.";
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            MessageBoxW(IntPtr.Zero, message, "Already running", MB_OK | MB_ICONINFORMATION);
+            return;
+        }
+
+        Console.Error.WriteLine(message);
     }
 
     private const uint MB_OK = 0x0;
