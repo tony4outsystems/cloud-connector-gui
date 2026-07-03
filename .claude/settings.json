@@ -12,7 +12,8 @@
       "Bash(git apply *)",
       "Read(//tmp/patches/**)",
       "Read(//c/Users/totob/AppData/Local/Temp/patches/**)",
-      "Bash(dotnet restore *)"
+      "Bash(dotnet restore *)",
+      "Bash(git rm *)"
     ]
   }
 }
