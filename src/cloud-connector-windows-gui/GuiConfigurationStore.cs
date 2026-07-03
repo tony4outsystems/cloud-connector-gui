@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.Text;
 using CloudConnectorWindowsGui.Core;
 
@@ -32,8 +31,6 @@ internal sealed class GuiConfigurationStore
         var token = string.Empty;
         var proxy = string.Empty;
         var verbose = false;
-        var autoUpdate = "daily";
-        DateOnly? lastUpdateCheck = null;
         var endpoints = new List<Endpoint>();
         EndpointDraft? currentEndpoint = null;
 
@@ -81,12 +78,6 @@ internal sealed class GuiConfigurationStore
                 case "verbose":
                     verbose = bool.TryParse(value, out var parsed) && parsed;
                     break;
-                case "auto_update":
-                    autoUpdate = NormalizeAutoUpdate(ParseString(value));
-                    break;
-                case "last_update_check":
-                    lastUpdateCheck = ParseDate(value);
-                    break;
             }
         }
 
@@ -98,8 +89,6 @@ internal sealed class GuiConfigurationStore
             Token = token,
             Proxy = proxy,
             Verbose = verbose,
-            AutoUpdate = autoUpdate,
-            LastUpdateCheck = lastUpdateCheck,
             Endpoints = endpoints
         };
     }
@@ -117,12 +106,6 @@ internal sealed class GuiConfigurationStore
         builder.Append("token = \"").Append(Escape(configuration.Token)).AppendLine("\"");
         builder.Append("proxy = \"").Append(Escape(configuration.Proxy)).AppendLine("\"");
         builder.Append("verbose = ").AppendLine(configuration.Verbose.ToString().ToLowerInvariant());
-        builder.Append("auto_update = \"").Append(Escape(NormalizeAutoUpdate(configuration.AutoUpdate))).AppendLine("\"");
-        if (configuration.LastUpdateCheck is not null)
-        {
-            builder.Append("last_update_check = ")
-                .AppendLine(configuration.LastUpdateCheck.Value.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
-        }
 
         foreach (var endpoint in configuration.Endpoints)
         {
@@ -202,25 +185,6 @@ internal sealed class GuiConfigurationStore
         }
 
         return builder.ToString();
-    }
-
-    private static DateOnly? ParseDate(string value)
-    {
-        var trimmed = value.Trim().Trim('"');
-        return DateOnly.TryParseExact(trimmed, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsed)
-            ? parsed
-            : null;
-    }
-
-    private static string NormalizeAutoUpdate(string value)
-    {
-        return value.Trim().ToLowerInvariant() switch
-        {
-            "off" => "off",
-            "weekly" => "weekly",
-            "monthly" => "monthly",
-            _ => "daily"
-        };
     }
 
     private static string Escape(string value)
