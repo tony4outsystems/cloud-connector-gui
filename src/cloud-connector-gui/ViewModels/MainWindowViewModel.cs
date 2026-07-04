@@ -88,6 +88,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
     public async Task OnShownAsync()
     {
+        await EnsureBinaryInstalledAsync().ConfigureAwait(true);
         await RefreshBinaryVersionAsync().ConfigureAwait(true);
         await CheckSelfUpdateAsync().ConfigureAwait(true);
     }
@@ -232,6 +233,43 @@ public sealed partial class MainWindowViewModel : ObservableObject
         {
             AppendLog($"Binary install failed: {ex.Message}");
             await ShowMessageAsync(ex.Message, "Cannot install connector binary").ConfigureAwait(true);
+        }
+        finally
+        {
+            StatusText = previousStatus;
+            state.SetRunning(controller.IsConnectorRunning);
+            RenderState();
+        }
+    }
+
+    private async Task EnsureBinaryInstalledAsync()
+    {
+        if (File.Exists(controller.ConnectorExecutablePath))
+        {
+            return;
+        }
+
+        CanUpdateBinary = false;
+        CanStart = false;
+        var previousStatus = StatusText;
+        try
+        {
+            var progress = new Progress<string>(message =>
+            {
+                StatusText = message;
+                AppendLog(message);
+            });
+
+            var result = await controller.InstallOrUpdateBinaryAsync(force: false, progress).ConfigureAwait(true);
+
+            if (result.Installed)
+            {
+                AppendLog($"Installed outsystemscc {result.Version}.");
+            }
+        }
+        catch (Exception ex) when (ex is HttpRequestException or IOException or InvalidOperationException or UnauthorizedAccessException)
+        {
+            AppendLog($"Binary install failed: {ex.Message}");
         }
         finally
         {
