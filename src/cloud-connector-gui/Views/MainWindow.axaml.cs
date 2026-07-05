@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using CloudConnectorGui.ViewModels;
 
@@ -27,6 +28,11 @@ public sealed partial class MainWindow : Window
     }
 
     private MainWindowViewModel ViewModel => (MainWindowViewModel)DataContext!;
+
+    private async void ServiceModeToggle_OnClick(object? sender, RoutedEventArgs args)
+    {
+        await ViewModel.ToggleServiceModeCommand.ExecuteAsync(null).ConfigureAwait(true);
+    }
 
     private void InitializeComponent()
     {

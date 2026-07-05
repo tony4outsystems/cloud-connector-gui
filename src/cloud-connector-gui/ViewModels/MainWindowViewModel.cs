@@ -68,6 +68,26 @@ public sealed partial class MainWindowViewModel : ObservableObject
     [ObservableProperty]
     private bool canApplySelfUpdate;
 
+    [ObservableProperty]
+    private bool isServiceModeEnabled;
+
+    [ObservableProperty]
+    private bool canInstallService;
+
+    [ObservableProperty]
+    private bool canStartService;
+
+    [ObservableProperty]
+    private bool canStopService;
+
+    [ObservableProperty]
+    private bool canRestartService;
+
+    [ObservableProperty]
+    private string serviceStatusText = "Not installed";
+
+    public bool IsServiceModeSupported { get; private set; }
+
     public MainWindowViewModel()
     {
         controller.LogRequested += line => AppendLog(line);
@@ -77,6 +97,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
             state.SetRunning(false);
             RenderState();
         };
+        IsServiceModeSupported = controller.IsServiceModeSupported;
     }
 
     public bool IsConnectorRunning => controller.IsConnectorRunning;
@@ -91,6 +112,35 @@ public sealed partial class MainWindowViewModel : ObservableObject
         await EnsureBinaryInstalledAsync().ConfigureAwait(true);
         await RefreshBinaryVersionAsync().ConfigureAwait(true);
         await CheckSelfUpdateAsync().ConfigureAwait(true);
+        RunPendingServiceAction();
+    }
+
+    private void RunPendingServiceAction()
+    {
+        var pendingAction = PendingServiceActions.TryParse(GuiApplication.StartupArgs);
+        if (pendingAction is null)
+        {
+            return;
+        }
+
+        switch (pendingAction.Value)
+        {
+            case PendingServiceAction.Install:
+                PerformInstallService();
+                break;
+            case PendingServiceAction.Uninstall:
+                PerformUninstallService();
+                break;
+            case PendingServiceAction.Start:
+                PerformStartService();
+                break;
+            case PendingServiceAction.Stop:
+                PerformStopService();
+                break;
+            case PendingServiceAction.Restart:
+                PerformRestartService();
+                break;
+        }
     }
 
     public void Save()
@@ -103,6 +153,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         try
         {
             state.ApplyConfiguration(controller.LoadConfiguration());
+            controller.RefreshServiceState(state);
             ApplyStateToProperties();
             RenderState();
         }
@@ -349,6 +400,242 @@ public sealed partial class MainWindowViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private async Task ToggleServiceModeAsync()
+    {
+        if (IsServiceModeEnabled)
+        {
+            var installed = await InstallServiceFlowAsync().ConfigureAwait(true);
+            if (!installed)
+            {
+                IsServiceModeEnabled = false;
+            }
+        }
+        else
+        {
+            var uninstalled = await UninstallServiceFlowAsync().ConfigureAwait(true);
+            if (!uninstalled)
+            {
+                IsServiceModeEnabled = true;
+            }
+        }
+    }
+
+    private async Task<bool> InstallServiceFlowAsync()
+    {
+        CaptureStateFromProperties();
+        var validationErrors = controller.ValidateLaunchOptions(state);
+        if (validationErrors.Count > 0)
+        {
+            await ShowMessageAsync(string.Join(Environment.NewLine, validationErrors), "Cannot install service").ConfigureAwait(true);
+            return false;
+        }
+
+        var confirmed = await ConfirmDialogWindow.ShowAsync(
+            OwnerWindow!,
+            "Install as Windows Service",
+            "The service will be installed with the current configuration. You cannot change the configuration when the service is installed. Make sure to validate it first before installing the service. Clicking the switch again will uninstall the service.",
+            confirmText: "Install").ConfigureAwait(true);
+        if (!confirmed)
+        {
+            return false;
+        }
+
+        controller.SaveConfiguration(state);
+
+        if (!ElevationHelper.IsElevated)
+        {
+            return await RelaunchElevatedAsync(PendingServiceAction.Install).ConfigureAwait(true);
+        }
+
+        return PerformInstallService();
+    }
+
+    private async Task<bool> UninstallServiceFlowAsync()
+    {
+        var confirmed = await ConfirmDialogWindow.ShowAsync(
+            OwnerWindow!,
+            "Uninstall Windows Service",
+            "This will stop and remove the Windows Service and delete the copied connector binary. Continue?",
+            confirmText: "Uninstall").ConfigureAwait(true);
+        if (!confirmed)
+        {
+            return false;
+        }
+
+        if (!ElevationHelper.IsElevated)
+        {
+            return await RelaunchElevatedAsync(PendingServiceAction.Uninstall).ConfigureAwait(true);
+        }
+
+        return PerformUninstallService();
+    }
+
+    [RelayCommand]
+    private async Task StartServiceAsync()
+    {
+        if (!ElevationHelper.IsElevated)
+        {
+            await RelaunchElevatedAsync(PendingServiceAction.Start).ConfigureAwait(true);
+            return;
+        }
+
+        PerformStartService();
+    }
+
+    [RelayCommand]
+    private async Task StopServiceAsync()
+    {
+        if (!ElevationHelper.IsElevated)
+        {
+            await RelaunchElevatedAsync(PendingServiceAction.Stop).ConfigureAwait(true);
+            return;
+        }
+
+        PerformStopService();
+    }
+
+    [RelayCommand]
+    private async Task RestartServiceAsync()
+    {
+        if (!ElevationHelper.IsElevated)
+        {
+            await RelaunchElevatedAsync(PendingServiceAction.Restart).ConfigureAwait(true);
+            return;
+        }
+
+        PerformRestartService();
+    }
+
+    private bool PerformInstallService()
+    {
+        try
+        {
+            AppendLog("Installing Windows Service...");
+            controller.InstallService(state);
+            AppendLog("Windows Service installed and started.");
+            RenderState();
+            return true;
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or IOException or UnauthorizedAccessException or FileNotFoundException)
+        {
+            AppendLog($"Service install failed: {ex.Message}");
+            TryRollbackService();
+            RenderState();
+            return false;
+        }
+    }
+
+    private bool PerformUninstallService()
+    {
+        try
+        {
+            AppendLog("Uninstalling Windows Service...");
+            controller.UninstallService(state);
+            AppendLog("Windows Service uninstalled.");
+            RenderState();
+            return true;
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or IOException or UnauthorizedAccessException)
+        {
+            AppendLog($"Service uninstall failed: {ex.Message}");
+            RenderState();
+            return false;
+        }
+    }
+
+    private void PerformStartService()
+    {
+        try
+        {
+            AppendLog("Starting Windows Service...");
+            controller.StartService(state);
+            AppendLog("Windows Service started.");
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or System.ServiceProcess.TimeoutException)
+        {
+            AppendLog($"Service start failed: {ex.Message}");
+        }
+        finally
+        {
+            RenderState();
+        }
+    }
+
+    private void PerformStopService()
+    {
+        try
+        {
+            AppendLog("Stopping Windows Service...");
+            controller.StopService(state);
+            AppendLog("Windows Service stopped.");
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or System.ServiceProcess.TimeoutException)
+        {
+            AppendLog($"Service stop failed: {ex.Message}");
+        }
+        finally
+        {
+            RenderState();
+        }
+    }
+
+    private void PerformRestartService()
+    {
+        try
+        {
+            AppendLog("Restarting Windows Service...");
+            controller.RestartService(state);
+            AppendLog("Windows Service restarted.");
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or System.ServiceProcess.TimeoutException)
+        {
+            AppendLog($"Service restart failed: {ex.Message}");
+        }
+        finally
+        {
+            RenderState();
+        }
+    }
+
+    private void TryRollbackService()
+    {
+        try
+        {
+            controller.UninstallService(state);
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or IOException or UnauthorizedAccessException)
+        {
+            AppendLog($"Service rollback failed: {ex.Message}");
+        }
+    }
+
+    private async Task<bool> RelaunchElevatedAsync(PendingServiceAction action)
+    {
+        if (!OperatingSystem.IsWindows())
+        {
+            return false;
+        }
+
+        await ShowMessageAsync(
+            "Cloud Connector GUI needs to restart with administrator rights to continue.",
+            "Administrator rights required").ConfigureAwait(true);
+
+        SingleInstanceGuard.Release();
+        var launched = ElevationHelper.TryRelaunchElevated(action);
+        if (launched)
+        {
+            Environment.Exit(0);
+            return true;
+        }
+
+        SingleInstanceGuard.TryAcquire();
+        await ShowMessageAsync(
+            "Administrator rights were not granted. No changes were made.",
+            "Cannot continue").ConfigureAwait(true);
+        return false;
+    }
+
+    [RelayCommand]
     private async Task OpenConfigurationAsync()
     {
         if (OwnerWindow is not null)
@@ -399,6 +686,20 @@ public sealed partial class MainWindowViewModel : ObservableObject
         CanApplySelfUpdate = state.CanApplySelfUpdate;
         SelfUpdateBannerText = state.SelfUpdateBannerText;
         IsSelfUpdateBannerVisible = state.IsSelfUpdateBannerVisible;
+        IsServiceModeEnabled = state.IsServiceModeEnabled;
+        CanInstallService = state.CanInstallService;
+        CanStartService = state.CanStartService;
+        CanStopService = state.CanStopService;
+        CanRestartService = state.CanRestartService;
+        ServiceStatusText = state.ServiceState switch
+        {
+            ServiceRunState.NotInstalled => "Not installed",
+            ServiceRunState.Stopped => "Stopped",
+            ServiceRunState.StartPending => "Starting...",
+            ServiceRunState.Running => "Running",
+            ServiceRunState.StopPending => "Stopping...",
+            _ => "Unknown"
+        };
     }
 
     private void AppendLog(string line)

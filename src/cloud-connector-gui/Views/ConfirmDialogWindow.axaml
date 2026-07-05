@@ -1,0 +1,16 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="CloudConnectorGui.Views.ConfirmDialogWindow"
+        Width="440" SizeToContent="Height"
+        MinHeight="160"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False">
+    <Grid Margin="24" RowDefinitions="*,Auto" RowSpacing="20">
+        <TextBlock Grid.Row="0" Name="MessageText" TextWrapping="Wrap" />
+        <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto">
+            <Button Grid.Column="1" Name="CancelButton" Classes="subtle" Content="Cancel" MinWidth="80" Margin="0,0,8,0" IsCancel="True" />
+            <Button Grid.Column="2" Name="ConfirmButton" Classes="primary" Content="Confirm" MinWidth="80" IsDefault="True" />
+        </Grid>
+    </Grid>
+</Window>

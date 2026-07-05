@@ -5,17 +5,22 @@ namespace CloudConnectorGui;
 
 internal static class Program
 {
-    private const string SingleInstanceMutexName = "CloudConnectorGui-SingleInstance";
-
     [STAThread]
     public static void Main(string[] args)
     {
         VelopackApp.Build().Run();
 
-        using var singleInstanceMutex = new Mutex(true, SingleInstanceMutexName, out var createdNew);
-        GuiApplication.AlreadyRunning = !createdNew;
+        GuiApplication.StartupArgs = args;
+        GuiApplication.AlreadyRunning = !SingleInstanceGuard.TryAcquire();
 
-        BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+        try
+        {
+            BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+        }
+        finally
+        {
+            SingleInstanceGuard.Release();
+        }
     }
 
     public static AppBuilder BuildAvaloniaApp()

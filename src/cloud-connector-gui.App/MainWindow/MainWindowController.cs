@@ -8,9 +8,15 @@ public sealed class MainWindowController
     private readonly CloudConnectorBinaryManager binaryManager;
     private readonly SelfUpdateManager selfUpdateManager;
     private readonly GuiConfigurationStore configurationStore;
+    private readonly IConnectorServiceManager serviceManager;
 
     public MainWindowController()
-        : this(new ConnectorProcess(), new CloudConnectorBinaryManager(), new SelfUpdateManager(), new GuiConfigurationStore())
+        : this(
+            new ConnectorProcess(),
+            new CloudConnectorBinaryManager(),
+            new SelfUpdateManager(),
+            new GuiConfigurationStore(),
+            OperatingSystem.IsWindows() ? new WindowsConnectorServiceManager() : new NotSupportedConnectorServiceManager())
     {
     }
 
@@ -18,12 +24,14 @@ public sealed class MainWindowController
         ConnectorProcess connector,
         CloudConnectorBinaryManager binaryManager,
         SelfUpdateManager selfUpdateManager,
-        GuiConfigurationStore configurationStore)
+        GuiConfigurationStore configurationStore,
+        IConnectorServiceManager serviceManager)
     {
         this.connector = connector;
         this.binaryManager = binaryManager;
         this.selfUpdateManager = selfUpdateManager;
         this.configurationStore = configurationStore;
+        this.serviceManager = serviceManager;
         connector.OutputReceived += line => LogRequested?.Invoke(line);
         connector.Exited += exitCode => ConnectorExited?.Invoke(exitCode);
     }
@@ -126,6 +134,52 @@ public sealed class MainWindowController
 
         configurationStore.Save(state.ToConfiguration());
         await selfUpdateManager.ApplyUpdateAndRestartAsync(state.AvailableSelfUpdate, progress, cancellationToken).ConfigureAwait(false);
+    }
+
+    public bool IsServiceModeSupported => serviceManager.IsSupported;
+
+    public void RefreshServiceState(MainWindowState state)
+    {
+        if (!serviceManager.IsSupported)
+        {
+            state.IsServiceModeEnabled = false;
+            state.ServiceState = ServiceRunState.NotInstalled;
+            return;
+        }
+
+        state.ServiceState = serviceManager.GetState();
+        state.IsServiceModeEnabled = state.ServiceState != ServiceRunState.NotInstalled;
+    }
+
+    public void InstallService(MainWindowState state)
+    {
+        var options = state.ToLaunchOptions();
+        serviceManager.Install(options, binaryManager.ExecutablePath);
+        RefreshServiceState(state);
+    }
+
+    public void UninstallService(MainWindowState state)
+    {
+        serviceManager.Uninstall();
+        RefreshServiceState(state);
+    }
+
+    public void StartService(MainWindowState state)
+    {
+        serviceManager.Start();
+        RefreshServiceState(state);
+    }
+
+    public void StopService(MainWindowState state)
+    {
+        serviceManager.Stop();
+        RefreshServiceState(state);
+    }
+
+    public void RestartService(MainWindowState state)
+    {
+        serviceManager.Restart();
+        RefreshServiceState(state);
     }
 
     public static bool IsSelfUpdateCheckDue(GuiConfiguration configuration)

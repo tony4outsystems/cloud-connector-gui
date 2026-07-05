@@ -8,7 +8,7 @@
         Width="1000" Height="900"
         MinWidth="920" MinHeight="860"
         WindowStartupLocation="CenterScreen">
-    <Grid Margin="20" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,*" RowSpacing="14">
+    <Grid Margin="20" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,*" RowSpacing="14">
         <Menu Grid.Row="0" Margin="-8,-8,0,-6" IsVisible="{Binding !IsMacOS}">
             <MenuItem Header="_File">
                 <MenuItem Header="_Configuration..." Command="{Binding OpenConfigurationCommand}" />
@@ -56,7 +56,20 @@
             </StackPanel>
         </Border>
 
-        <Border Grid.Row="4" Classes="card" Padding="16" MinHeight="220">
+        <Border Grid.Row="4" Classes="card" Padding="16" IsVisible="{Binding IsServiceModeSupported}">
+            <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto" RowSpacing="6">
+                <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Classes="h2" Text="SERVICE MODE" />
+                <ToggleSwitch Grid.Row="1" Grid.Column="0"
+                              Name="ServiceModeToggle"
+                              OnContent="Service mode ON"
+                              OffContent="Service mode OFF"
+                              IsChecked="{Binding IsServiceModeEnabled}"
+                              Click="ServiceModeToggle_OnClick" />
+                <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding ServiceStatusText}" VerticalAlignment="Center" Classes="subtle" />
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="5" Classes="card" Padding="16" MinHeight="220">
             <Grid RowDefinitions="Auto,*,Auto" RowSpacing="10">
                 <TextBlock Grid.Row="0" Classes="h2" Text="ENDPOINTS" />
                 <DataGrid Grid.Row="1"
@@ -86,13 +99,20 @@
             </Grid>
         </Border>
 
-        <Grid Grid.Row="5" ColumnDefinitions="Auto,Auto,*">
+        <Grid Grid.Row="6" ColumnDefinitions="Auto,Auto,Auto,*" IsVisible="{Binding !IsServiceModeEnabled}">
             <Button Grid.Column="0" Classes="primary" Content="Start" Command="{Binding StartConnectorCommand}" IsEnabled="{Binding CanStart}" MinWidth="100" Margin="0,0,8,0" />
             <Button Grid.Column="1" Classes="subtle" Content="Stop" Command="{Binding StopConnectorCommand}" IsEnabled="{Binding CanStop}" MinWidth="100" Margin="0,0,8,0" />
-            <TextBlock Grid.Column="2" Text="{Binding StatusText}" VerticalAlignment="Center" Margin="8,0,0,0" />
+            <TextBlock Grid.Column="3" Text="{Binding StatusText}" VerticalAlignment="Center" Margin="8,0,0,0" />
         </Grid>
 
-        <Border Grid.Row="6" Classes="card" Padding="16">
+        <Grid Grid.Row="6" ColumnDefinitions="Auto,Auto,Auto,*" IsVisible="{Binding IsServiceModeEnabled}">
+            <Button Grid.Column="0" Classes="primary" Content="Start" Command="{Binding StartServiceCommand}" IsEnabled="{Binding CanStartService}" MinWidth="100" Margin="0,0,8,0" />
+            <Button Grid.Column="1" Classes="subtle" Content="Stop" Command="{Binding StopServiceCommand}" IsEnabled="{Binding CanStopService}" MinWidth="100" Margin="0,0,8,0" />
+            <Button Grid.Column="2" Classes="subtle" Content="Restart" Command="{Binding RestartServiceCommand}" IsEnabled="{Binding CanRestartService}" MinWidth="100" Margin="0,0,8,0" />
+            <TextBlock Grid.Column="3" Text="{Binding ServiceStatusText}" VerticalAlignment="Center" Margin="8,0,0,0" />
+        </Grid>
+
+        <Border Grid.Row="7" Classes="card" Padding="16">
             <Grid RowDefinitions="Auto,*" RowSpacing="10">
                 <TextBlock Grid.Row="0" Classes="h2" Text="LOGS" />
                 <TextBox Grid.Row="1"
