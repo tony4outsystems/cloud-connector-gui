@@ -56,4 +56,58 @@ public sealed class MainWindowStateTests
         Assert.Equal(new DateOnly(2026, 7, 3), configuration.LastSelfUpdateCheck);
         Assert.Equal([new Endpoint("8081", "api.internal", "443")], configuration.Endpoints);
     }
+
+    [Theory]
+    [InlineData(false, false, true)]
+    [InlineData(true, false, false)]
+    [InlineData(false, true, false)]
+    [InlineData(true, true, false)]
+    public void CanEditConfigurationReflectsRunningAndServiceMode(bool isRunning, bool isServiceModeEnabled, bool expected)
+    {
+        var state = new MainWindowState
+        {
+            IsRunning = isRunning,
+            IsServiceModeEnabled = isServiceModeEnabled
+        };
+
+        Assert.Equal(expected, state.CanEditConfiguration);
+    }
+
+    [Theory]
+    [InlineData(false, false, true)]
+    [InlineData(true, false, false)]
+    [InlineData(false, true, false)]
+    public void CanInstallServiceReflectsRunningAndServiceMode(bool isRunning, bool isServiceModeEnabled, bool expected)
+    {
+        var state = new MainWindowState
+        {
+            IsRunning = isRunning,
+            IsServiceModeEnabled = isServiceModeEnabled
+        };
+
+        Assert.Equal(expected, state.CanInstallService);
+    }
+
+    [Theory]
+    [InlineData(false, ServiceRunState.NotInstalled, false, false, false)]
+    [InlineData(true, ServiceRunState.Stopped, true, false, false)]
+    [InlineData(true, ServiceRunState.Running, false, true, true)]
+    [InlineData(true, ServiceRunState.StartPending, false, false, false)]
+    public void ServiceButtonsReflectServiceState(
+        bool isServiceModeEnabled,
+        ServiceRunState serviceState,
+        bool canStart,
+        bool canStop,
+        bool canRestart)
+    {
+        var state = new MainWindowState
+        {
+            IsServiceModeEnabled = isServiceModeEnabled,
+            ServiceState = serviceState
+        };
+
+        Assert.Equal(canStart, state.CanStartService);
+        Assert.Equal(canStop, state.CanStopService);
+        Assert.Equal(canRestart, state.CanRestartService);
+    }
 }

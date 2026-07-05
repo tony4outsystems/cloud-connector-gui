@@ -12,5 +12,6 @@
 
   <ItemGroup>
     <PackageReference Include="Velopack" Version="1.2.0" />
+    <PackageReference Include="System.ServiceProcess.ServiceController" Version="9.0.0" />
   </ItemGroup>
 </Project>

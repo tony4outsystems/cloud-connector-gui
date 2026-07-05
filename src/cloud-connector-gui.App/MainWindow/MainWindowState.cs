@@ -20,6 +20,10 @@ public sealed class MainWindowState
 
     public bool IsRunning { get; set; }
 
+    public bool IsServiceModeEnabled { get; set; }
+
+    public ServiceRunState ServiceState { get; set; } = ServiceRunState.NotInstalled;
+
     public string StatusText { get; set; } = "Stopped";
 
     public string BinaryVersionText { get; set; } = "Connector binary: not checked";
@@ -36,9 +40,17 @@ public sealed class MainWindowState
 
     public bool CanUpdateBinary => !IsRunning;
 
-    public bool CanEditConfiguration => !IsRunning;
+    public bool CanEditConfiguration => !IsRunning && !IsServiceModeEnabled;
 
     public bool CanApplySelfUpdate => !IsRunning && AvailableSelfUpdate is not null;
+
+    public bool CanInstallService => !IsRunning && !IsServiceModeEnabled;
+
+    public bool CanStartService => IsServiceModeEnabled && ServiceState == ServiceRunState.Stopped;
+
+    public bool CanStopService => IsServiceModeEnabled && ServiceState == ServiceRunState.Running;
+
+    public bool CanRestartService => IsServiceModeEnabled && ServiceState == ServiceRunState.Running;
 
     public LaunchOptions ToLaunchOptions()
     {

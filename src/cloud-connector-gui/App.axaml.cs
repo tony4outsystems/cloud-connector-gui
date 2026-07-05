@@ -13,6 +13,8 @@ public sealed class GuiApplication : Application
 {
     public static bool AlreadyRunning { get; set; }
 
+    public static string[] StartupArgs { get; set; } = [];
+
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
